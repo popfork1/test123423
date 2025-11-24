@@ -94,7 +94,10 @@ function GamesManager() {
       await apiRequest("POST", "/api/games", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        const key = query.queryKey;
+        return typeof key[0] === 'string' && key[0]?.startsWith('/api/games');
+      }});
       toast({ title: "Success", description: "Game added successfully" });
       setFormData({ week: 1, homeTeam: "", awayTeam: "" });
     },
@@ -117,7 +120,10 @@ function GamesManager() {
       await apiRequest("DELETE", `/api/games/${id}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        const key = query.queryKey;
+        return typeof key[0] === 'string' && key[0]?.startsWith('/api/games');
+      }});
       toast({ title: "Success", description: "Game deleted successfully" });
     },
     onError: (error: Error) => {
@@ -232,7 +238,10 @@ function ScoresManager() {
       await apiRequest("PATCH", `/api/games/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
+      queryClient.invalidateQueries({ predicate: (query) => {
+        const key = query.queryKey;
+        return typeof key[0] === 'string' && key[0]?.startsWith('/api/games');
+      }});
       toast({ title: "Success", description: "Score updated successfully" });
     },
     onError: (error: Error) => {
