@@ -130,7 +130,7 @@ export default function GameDetail() {
                 {game.isLive ? "LIVE" : game.isFinal ? "FINAL" : game.quarter}
               </Badge>
               <span className="text-sm text-muted-foreground" data-testid="text-game-time">
-                {game.gameTime ? format(new Date(game.gameTime), "EEEE, MMMM d 'at' h:mm a") : "Time TBD"}
+                {game.gameTime ? format(new Date(game.gameTime), "EEEE, MMMM d 'at' h:mm a 'EST'") : "Time TBD"}
               </span>
             </div>
 

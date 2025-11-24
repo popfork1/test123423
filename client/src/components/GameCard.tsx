@@ -25,7 +25,7 @@ export function GameCard({ game, onClick }: GameCardProps) {
             {game.isLive ? "LIVE" : game.isFinal ? "FINAL" : game.quarter}
           </Badge>
           <span className="text-xs text-muted-foreground" data-testid={`text-gametime-${game.id}`}>
-            {game.gameTime ? format(new Date(game.gameTime), "EEE, MMM d 'at' h:mm a") : "Time TBD"}
+            {game.gameTime ? format(new Date(game.gameTime), "EEE, MMM d 'at' h:mm a 'EST'") : "Time TBD"}
           </span>
         </div>
 

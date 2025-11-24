@@ -99,7 +99,7 @@ export default function Schedule() {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Calendar className="w-4 h-4" />
                             <span data-testid={`text-datetime-${game.id}`}>
-                              {gameDate ? format(gameDate, "EEE, MMM d 'at' h:mm a") : "Time TBD"}
+                              {gameDate ? format(gameDate, "EEE, MMM d 'at' h:mm a 'EST'") : "Time TBD"}
                             </span>
                           </div>
                           {game.location && (
