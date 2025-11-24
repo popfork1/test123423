@@ -100,8 +100,8 @@ export default function AdminDashboard() {
 function GamesManager() {
   const { toast } = useToast();
   const [week, setWeek] = useState(1);
-  const [gamesList, setGamesList] = useState<Array<{ team1: string; team2: string }>>([
-    { team1: "", team2: "" },
+  const [gamesList, setGamesList] = useState<Array<{ team1: string; team2: string; date: string; time: string }>>([
+    { team1: "", team2: "", date: "", time: "" },
   ]);
 
   const { data: games } = useQuery<Game[]>({
@@ -109,8 +109,16 @@ function GamesManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (games: Array<{ week: number; team1: string; team2: string }>) => {
-      await Promise.all(games.map((game) => apiRequest("POST", "/api/games", game)));
+    mutationFn: async (games: Array<{ week: number; team1: string; team2: string; date: string; time: string }>) => {
+      await Promise.all(games.map((game) => {
+        const gameTime = new Date(`${game.date}T${game.time}`);
+        return apiRequest("POST", "/api/games", {
+          week: game.week,
+          team1: game.team1,
+          team2: game.team2,
+          gameTime: gameTime.toISOString(),
+        });
+      }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ predicate: (query) => {
@@ -118,7 +126,7 @@ function GamesManager() {
         return typeof key[0] === 'string' && key[0]?.startsWith('/api/games');
       }});
       toast({ title: "Success", description: "Week scheduled successfully" });
-      setGamesList([{ team1: "", team2: "" }]);
+      setGamesList([{ team1: "", team2: "", date: "", time: "" }]);
       setWeek(1);
     },
     onError: (error: Error) => {
@@ -162,22 +170,22 @@ function GamesManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim());
+    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim() && g.date.trim() && g.time.trim());
     if (validGames.length === 0) {
-      toast({ title: "Error", description: "Add at least one game", variant: "destructive" });
+      toast({ title: "Error", description: "Add at least one complete game with date and time", variant: "destructive" });
       return;
     }
     createMutation.mutate(validGames.map((g) => ({ week, ...g })));
   };
 
-  const handleGameChange = (index: number, field: "team1" | "team2", value: string) => {
+  const handleGameChange = (index: number, field: "team1" | "team2" | "date" | "time", value: string) => {
     const updated = [...gamesList];
     updated[index] = { ...updated[index], [field]: value };
     setGamesList(updated);
   };
 
   const addGameRow = () => {
-    setGamesList([...gamesList, { team1: "", team2: "" }]);
+    setGamesList([...gamesList, { team1: "", team2: "", date: "", time: "" }]);
   };
 
   const removeGameRow = (index: number) => {
@@ -223,7 +231,7 @@ function GamesManager() {
               const usedTeams = gamesList.map(g => g.team1).concat(gamesList.map(g => g.team2)).filter(t => t && (t !== game.team1 || t === game.team1) && (t !== game.team2 || t === game.team2));
               const availableTeams = AVAILABLE_TEAMS.filter(t => !usedTeams.includes(t) || t === game.team1 || t === game.team2);
               return (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border rounded-md bg-muted/30" data-testid={`game-row-${index}`}>
+              <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 border rounded-md bg-muted/30" data-testid={`game-row-${index}`}>
                 <div>
                   <Label htmlFor={`team2-${index}`}>Team 2</Label>
                   <Select value={game.team2} onValueChange={(value) => handleGameChange(index, "team2", value)}>
@@ -254,13 +262,33 @@ function GamesManager() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <Label htmlFor={`date-${index}`}>Date</Label>
+                  <Input
+                    id={`date-${index}`}
+                    type="date"
+                    value={game.date}
+                    onChange={(e) => handleGameChange(index, "date", e.target.value)}
+                    data-testid={`input-date-${index}`}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`time-${index}`}>Time</Label>
+                  <Input
+                    id={`time-${index}`}
+                    type="time"
+                    value={game.time}
+                    onChange={(e) => handleGameChange(index, "time", e.target.value)}
+                    data-testid={`input-time-${index}`}
+                  />
+                </div>
                 {gamesList.length > 1 && (
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => removeGameRow(index)}
-                    className="md:col-span-2 justify-self-end"
+                    className="md:col-span-4 justify-self-end"
                     data-testid={`button-remove-game-${index}`}
                   >
                     <Trash2 className="w-4 h-4" />
