@@ -46,7 +46,7 @@ export const games = pgTable("games", {
   homeScore: integer("home_score").default(0),
   awayScore: integer("away_score").default(0),
   quarter: varchar("quarter", { length: 20 }).default("Scheduled"), // "Q1", "Q2", "Q3", "Q4", "FINAL", "Scheduled"
-  gameTime: timestamp("game_time").notNull(),
+  gameTime: timestamp("game_time").defaultNow(),
   location: varchar("location", { length: 200 }),
   isFinal: boolean("is_final").default(false),
   isLive: boolean("is_live").default(false),
@@ -58,6 +58,7 @@ export const insertGameSchema = createInsertSchema(games).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  gameTime: true,
 });
 
 export type InsertGame = z.infer<typeof insertGameSchema>;

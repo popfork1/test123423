@@ -83,8 +83,6 @@ function GamesManager() {
     week: 1,
     homeTeam: "",
     awayTeam: "",
-    gameTime: "",
-    location: "",
   });
 
   const { data: games } = useQuery<Game[]>({
@@ -98,7 +96,7 @@ function GamesManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/games"] });
       toast({ title: "Success", description: "Game added successfully" });
-      setFormData({ week: 1, homeTeam: "", awayTeam: "", gameTime: "", location: "" });
+      setFormData({ week: 1, homeTeam: "", awayTeam: "" });
     },
     onError: (error: Error) => {
       if (isUnauthorizedError(error)) {
@@ -161,20 +159,6 @@ function GamesManager() {
               />
             </div>
             <div>
-              <Label htmlFor="gameTime">Game Date & Time</Label>
-              <Input
-                id="gameTime"
-                type="datetime-local"
-                value={formData.gameTime}
-                onChange={(e) => setFormData({ ...formData, gameTime: e.target.value })}
-                required
-                data-testid="input-gametime"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
               <Label htmlFor="awayTeam">Away Team</Label>
               <Input
                 id="awayTeam"
@@ -184,25 +168,16 @@ function GamesManager() {
                 data-testid="input-away-team"
               />
             </div>
-            <div>
-              <Label htmlFor="homeTeam">Home Team</Label>
-              <Input
-                id="homeTeam"
-                value={formData.homeTeam}
-                onChange={(e) => setFormData({ ...formData, homeTeam: e.target.value })}
-                required
-                data-testid="input-home-team"
-              />
-            </div>
           </div>
 
           <div>
-            <Label htmlFor="location">Location (Optional)</Label>
+            <Label htmlFor="homeTeam">Home Team</Label>
             <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              data-testid="input-location"
+              id="homeTeam"
+              value={formData.homeTeam}
+              onChange={(e) => setFormData({ ...formData, homeTeam: e.target.value })}
+              required
+              data-testid="input-home-team"
             />
           </div>
 
