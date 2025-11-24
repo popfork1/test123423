@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,27 +19,6 @@ interface BracketMatch {
 }
 
 export default function Playoffs() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You must be logged in to manage the playoff bracket.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   const [bracket, setBracket] = useState<BracketMatch[]>([
     // Wildcard Round (4 matches)
     { id: "wc1", round: 1, team1: undefined, team2: undefined },
