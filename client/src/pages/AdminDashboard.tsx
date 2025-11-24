@@ -407,7 +407,7 @@ function GamesManager() {
                     </div>
                     <p className="font-semibold">{game.team2} vs {game.team1}</p>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(game.gameTime), "MMM d, yyyy 'at' h:mm a")}
+                      {game.gameTime ? format(new Date(game.gameTime), "MMM d, yyyy 'at' h:mm a") : "Time TBD"}
                     </p>
                   </div>
                   <div className="flex gap-2">
