@@ -18,24 +18,22 @@ import NotFound from "@/pages/not-found";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      {!isLoading && (isAuthenticated || window.location.pathname !== "/") && <Header />}
+      <Header />
       
       <Switch>
-        {isLoading || !isAuthenticated ? (
-          <Route path="/" component={Landing} />
-        ) : (
-          <>
-            <Route path="/" component={LiveScores} />
-            <Route path="/game/:id" component={GameDetail} />
-            <Route path="/previous-weeks" component={PreviousWeeks} />
-            <Route path="/schedule" component={Schedule} />
-            <Route path="/news" component={News} />
-            <Route path="/pickems" component={Pickems} />
-            <Route path="/admin" component={AdminDashboard} />
-          </>
-        )}
+        <Route path="/" component={LiveScores} />
+        <Route path="/game/:id" component={GameDetail} />
+        <Route path="/previous-weeks" component={PreviousWeeks} />
+        <Route path="/schedule" component={Schedule} />
+        <Route path="/news" component={News} />
+        <Route path="/pickems" component={Pickems} />
+        {isAuthenticated && <Route path="/admin" component={AdminDashboard} />}
         <Route component={NotFound} />
       </Switch>
     </div>
