@@ -80,8 +80,8 @@ export default function AdminDashboard() {
 function GamesManager() {
   const { toast } = useToast();
   const [week, setWeek] = useState(1);
-  const [gamesList, setGamesList] = useState<Array<{ homeTeam: string; awayTeam: string }>>([
-    { homeTeam: "", awayTeam: "" },
+  const [gamesList, setGamesList] = useState<Array<{ team1: string; team2: string }>>([
+    { team1: "", team2: "" },
   ]);
 
   const { data: games } = useQuery<Game[]>({
@@ -89,7 +89,7 @@ function GamesManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (games: Array<{ week: number; homeTeam: string; awayTeam: string }>) => {
+    mutationFn: async (games: Array<{ week: number; team1: string; team2: string }>) => {
       await Promise.all(games.map((game) => apiRequest("POST", "/api/games", game)));
     },
     onSuccess: () => {
@@ -98,7 +98,7 @@ function GamesManager() {
         return typeof key[0] === 'string' && key[0]?.startsWith('/api/games');
       }});
       toast({ title: "Success", description: "Week scheduled successfully" });
-      setGamesList([{ homeTeam: "", awayTeam: "" }]);
+      setGamesList([{ team1: "", team2: "" }]);
       setWeek(1);
     },
     onError: (error: Error) => {
@@ -142,7 +142,7 @@ function GamesManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validGames = gamesList.filter((g) => g.homeTeam.trim() && g.awayTeam.trim());
+    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim());
     if (validGames.length === 0) {
       toast({ title: "Error", description: "Add at least one game", variant: "destructive" });
       return;
@@ -150,14 +150,14 @@ function GamesManager() {
     createMutation.mutate(validGames.map((g) => ({ week, ...g })));
   };
 
-  const handleGameChange = (index: number, field: "homeTeam" | "awayTeam", value: string) => {
+  const handleGameChange = (index: number, field: "team1" | "team2", value: string) => {
     const updated = [...gamesList];
     updated[index] = { ...updated[index], [field]: value };
     setGamesList(updated);
   };
 
   const addGameRow = () => {
-    setGamesList([...gamesList, { homeTeam: "", awayTeam: "" }]);
+    setGamesList([...gamesList, { team1: "", team2: "" }]);
   };
 
   const removeGameRow = (index: number) => {
@@ -202,23 +202,23 @@ function GamesManager() {
             {gamesList.map((game, index) => (
               <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 border rounded-md bg-muted/30" data-testid={`game-row-${index}`}>
                 <div>
-                  <Label htmlFor={`away-${index}`}>Away Team</Label>
+                  <Label htmlFor={`team2-${index}`}>Team 2</Label>
                   <Input
-                    id={`away-${index}`}
-                    value={game.awayTeam}
-                    onChange={(e) => handleGameChange(index, "awayTeam", e.target.value)}
-                    placeholder="Away team"
-                    data-testid={`input-away-team-${index}`}
+                    id={`team2-${index}`}
+                    value={game.team2}
+                    onChange={(e) => handleGameChange(index, "team2", e.target.value)}
+                    placeholder="Team 2"
+                    data-testid={`input-team2-${index}`}
                   />
                 </div>
                 <div>
-                  <Label htmlFor={`home-${index}`}>Home Team</Label>
+                  <Label htmlFor={`team1-${index}`}>Team 1</Label>
                   <Input
-                    id={`home-${index}`}
-                    value={game.homeTeam}
-                    onChange={(e) => handleGameChange(index, "homeTeam", e.target.value)}
-                    placeholder="Home team"
-                    data-testid={`input-home-team-${index}`}
+                    id={`team1-${index}`}
+                    value={game.team1}
+                    onChange={(e) => handleGameChange(index, "team1", e.target.value)}
+                    placeholder="Team 1"
+                    data-testid={`input-team1-${index}`}
                   />
                 </div>
                 {gamesList.length > 1 && (

@@ -34,23 +34,23 @@ export function GameCard({ game, onClick }: GameCardProps) {
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className={`text-lg font-bold ${game.awayScore! > game.homeScore! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-away-team-${game.id}`}>
-              {game.awayTeam}
+            <span className={`text-lg font-bold ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-team2-${game.id}`}>
+              {game.team2}
             </span>
             {showScores && (
-              <span className={`text-5xl font-black tabular-nums ${game.awayScore! > game.homeScore! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-away-score-${game.id}`}>
-                {game.awayScore}
+              <span className={`text-5xl font-black tabular-nums ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-team2-score-${game.id}`}>
+                {game.team2Score}
               </span>
             )}
           </div>
 
           <div className="flex items-center justify-between">
-            <span className={`text-lg font-bold ${game.homeScore! > game.awayScore! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-home-team-${game.id}`}>
-              {game.homeTeam}
+            <span className={`text-lg font-bold ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-team1-${game.id}`}>
+              {game.team1}
             </span>
             {showScores && (
-              <span className={`text-5xl font-black tabular-nums ${game.homeScore! > game.awayScore! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-home-score-${game.id}`}>
-                {game.homeScore}
+              <span className={`text-5xl font-black tabular-nums ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : ''}`} data-testid={`text-team1-score-${game.id}`}>
+                {game.team1Score}
               </span>
             )}
           </div>

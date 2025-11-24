@@ -37,7 +37,7 @@ export default function GameDetail() {
   useEffect(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const hostname = window.location.hostname || "localhost";
-    const port = window.location.port ? `:${window.location.port}` : "";
+    const port = window.location.port ? `:${window.location.port}` : ":5000";
     const wsUrl = `${protocol}//${hostname}${port}/ws`;
     const socket = new WebSocket(wsUrl);
 
@@ -137,26 +137,26 @@ export default function GameDetail() {
             <div className="space-y-6">
               <div className="flex items-center justify-between py-4 border-b">
                 <div className="flex-1">
-                  <h2 className={`text-2xl md:text-3xl font-bold ${game.awayScore! > game.homeScore! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-away-team">
-                    {game.awayTeam}
+                  <h2 className={`text-2xl md:text-3xl font-bold ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team2">
+                    {game.team2}
                   </h2>
                 </div>
                 {!isScheduled && (
-                  <div className={`text-6xl md:text-7xl font-black tabular-nums ${game.awayScore! > game.homeScore! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-away-score">
-                    {game.awayScore}
+                  <div className={`text-6xl md:text-7xl font-black tabular-nums ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team2-score">
+                    {game.team2Score}
                   </div>
                 )}
               </div>
 
               <div className="flex items-center justify-between py-4">
                 <div className="flex-1">
-                  <h2 className={`text-2xl md:text-3xl font-bold ${game.homeScore! > game.awayScore! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-home-team">
-                    {game.homeTeam}
+                  <h2 className={`text-2xl md:text-3xl font-bold ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team1">
+                    {game.team1}
                   </h2>
                 </div>
                 {!isScheduled && (
-                  <div className={`text-6xl md:text-7xl font-black tabular-nums ${game.homeScore! > game.awayScore! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-home-score">
-                    {game.homeScore}
+                  <div className={`text-6xl md:text-7xl font-black tabular-nums ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team1-score">
+                    {game.team1Score}
                   </div>
                 )}
               </div>

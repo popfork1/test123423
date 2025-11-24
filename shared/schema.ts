@@ -41,10 +41,10 @@ export type User = typeof users.$inferSelect;
 export const games = pgTable("games", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   week: integer("week").notNull(),
-  homeTeam: varchar("home_team", { length: 100 }).notNull(),
-  awayTeam: varchar("away_team", { length: 100 }).notNull(),
-  homeScore: integer("home_score").default(0),
-  awayScore: integer("away_score").default(0),
+  team1: varchar("team1", { length: 100 }).notNull(),
+  team2: varchar("team2", { length: 100 }).notNull(),
+  team1Score: integer("team1_score").default(0),
+  team2Score: integer("team2_score").default(0),
   quarter: varchar("quarter", { length: 20 }).default("Scheduled"), // "Q1", "Q2", "Q3", "Q4", "FINAL", "Scheduled"
   gameTime: timestamp("game_time").defaultNow(),
   location: varchar("location", { length: 200 }),

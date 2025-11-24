@@ -85,11 +85,11 @@ export default function Schedule() {
                           </div>
                           <div className="space-y-1">
                             <p className="font-semibold text-lg" data-testid={`text-matchup-${game.id}`}>
-                              {game.awayTeam} @ {game.homeTeam}
+                              {game.team2} vs {game.team1}
                             </p>
                             {game.isFinal && (
                               <p className="text-muted-foreground" data-testid={`text-score-${game.id}`}>
-                                Final: {game.awayTeam} {game.awayScore} - {game.homeScore} {game.homeTeam}
+                                Final: {game.team2} {game.team2Score} - {game.team1Score} {game.team1}
                               </p>
                             )}
                           </div>
