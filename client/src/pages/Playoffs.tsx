@@ -30,9 +30,7 @@ export default function Playoffs() {
     { id: "div1", round: 2, team1: undefined, team2: undefined },
     { id: "div2", round: 2, team1: undefined, team2: undefined },
     // Championship Round (1 match)
-    { id: "conf", round: 3, team1: undefined, team2: undefined },
-    // Finals
-    { id: "final", round: 4, team1: undefined, team2: undefined },
+    { id: "final", round: 3, team1: undefined, team2: undefined },
   ]);
 
   const updateMatch = (matchId: string, field: string, value: any) => {
@@ -52,7 +50,6 @@ export default function Playoffs() {
     1: "Wildcard",
     2: "Divisional",
     3: "Championship",
-    4: "Super Bowl",
   };
 
   return (
@@ -70,7 +67,7 @@ export default function Playoffs() {
         {isAuthenticated ? (
           // Edit Mode
           <div className="space-y-8">
-            {[1, 2, 3, 4].map((round) => (
+            {[1, 2, 3].map((round) => (
               <Card key={round} className="p-6">
                 <h2 className="text-2xl font-bold mb-6" data-testid={`text-round-${round}`}>
                   {roundNames[round]}
@@ -155,7 +152,7 @@ export default function Playoffs() {
           // View Mode - Bracket Visualization
           <Card className="p-8 overflow-x-auto">
             <div className="min-w-max flex gap-8 justify-center">
-              {[1, 2, 3, 4].map((round) => {
+              {[1, 2, 3].map((round) => {
                 const matches = getMatchesForRound(round);
                 return (
                   <div key={round} className="flex flex-col justify-center gap-4">
