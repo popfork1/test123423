@@ -285,27 +285,30 @@ export default function Standings() {
                               )}
                             </td>
                             {isAuthenticated && (
-                              <td className="px-6 py-4 text-sm text-center flex gap-2 justify-center">
-                                {editingIds.includes(entry.id) && (
+                              <td className="px-6 py-4 text-sm text-center">
+                                <div className="flex gap-2 justify-center">
+                                  {editingIds.includes(entry.id) && (
+                                    <Button
+                                      onClick={() => saveEntry(entry.id)}
+                                      data-testid={`button-save-${entry.id}`}
+                                      disabled={upsertMutation.isPending}
+                                      size="sm"
+                                      className="gap-1"
+                                    >
+                                      <Check className="w-4 h-4" />
+                                      Save
+                                    </Button>
+                                  )}
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => saveEntry(entry.id)}
-                                    data-testid={`button-save-${entry.id}`}
-                                    disabled={upsertMutation.isPending}
+                                    onClick={() => deleteEntry(entry.id)}
+                                    data-testid={`button-delete-${entry.id}`}
+                                    disabled={deleteMutation.isPending}
                                   >
-                                    <Check className="w-4 h-4 text-green-600" />
+                                    <Trash2 className="w-4 h-4 text-destructive" />
                                   </Button>
-                                )}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => deleteEntry(entry.id)}
-                                  data-testid={`button-delete-${entry.id}`}
-                                  disabled={deleteMutation.isPending}
-                                >
-                                  <Trash2 className="w-4 h-4 text-destructive" />
-                                </Button>
+                                </div>
                               </td>
                             )}
                           </tr>
