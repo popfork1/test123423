@@ -103,6 +103,9 @@ function GamesManager() {
   const [gamesList, setGamesList] = useState<Array<{ team1: string; team2: string; date: string; time: string }>>([
     { team1: "", team2: "", date: "", time: "" },
   ]);
+  const [editingGameId, setEditingGameId] = useState<string | null>(null);
+  const [editDate, setEditDate] = useState("");
+  const [editTime, setEditTime] = useState("");
 
   const { data: games } = useQuery<Game[]>({
     queryKey: ["/api/games/all"],
@@ -111,13 +114,16 @@ function GamesManager() {
   const createMutation = useMutation({
     mutationFn: async (games: Array<{ week: number; team1: string; team2: string; date: string; time: string }>) => {
       await Promise.all(games.map((game) => {
-        const gameTime = new Date(`${game.date}T${game.time}`);
-        return apiRequest("POST", "/api/games", {
+        const payload: any = {
           week: game.week,
           team1: game.team1,
           team2: game.team2,
-          gameTime: gameTime.toISOString(),
-        });
+        };
+        if (game.date && game.time) {
+          const gameTime = new Date(`${game.date}T${game.time}`);
+          payload.gameTime = gameTime.toISOString();
+        }
+        return apiRequest("POST", "/api/games", payload);
       }));
     },
     onSuccess: () => {
@@ -168,11 +174,42 @@ function GamesManager() {
     },
   });
 
+  const updateTimeMutation = useMutation({
+    mutationFn: async ({ id, date, time }: { id: string; date: string; time: string }) => {
+      if (date && time) {
+        const gameTime = new Date(`${date}T${time}`);
+        await apiRequest("PATCH", `/api/games/${id}`, { gameTime: gameTime.toISOString() });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ predicate: (query) => {
+        const key = query.queryKey;
+        return typeof key[0] === 'string' && key[0]?.startsWith('/api/games');
+      }});
+      toast({ title: "Success", description: "Game time updated successfully" });
+      setEditingGameId(null);
+      setEditDate("");
+      setEditTime("");
+    },
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => window.location.href = "/api/login", 500);
+        return;
+      }
+      toast({ title: "Error", description: "Failed to update game time", variant: "destructive" });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim() && g.date.trim() && g.time.trim());
+    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim());
     if (validGames.length === 0) {
-      toast({ title: "Error", description: "Add at least one complete game with date and time", variant: "destructive" });
+      toast({ title: "Error", description: "Add at least one game with teams", variant: "destructive" });
       return;
     }
     createMutation.mutate(validGames.map((g) => ({ week, ...g })));
@@ -310,27 +347,95 @@ function GamesManager() {
         <h2 className="text-2xl font-bold mb-4">All Games</h2>
         <div className="space-y-3">
           {games?.map((game) => (
-            <div key={game.id} className="flex items-center justify-between p-4 border rounded-md" data-testid={`game-item-${game.id}`}>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge>Week {game.week}</Badge>
-                  {game.isLive && <Badge variant="default">LIVE</Badge>}
-                  {game.isFinal && <Badge variant="secondary">FINAL</Badge>}
+            <div key={game.id} data-testid={`game-item-${game.id}`}>
+              {editingGameId === game.id ? (
+                <div className="p-4 border rounded-md bg-muted/30 space-y-3">
+                  <p className="font-semibold">{game.team2} vs {game.team1}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor={`edit-date-${game.id}`}>Date</Label>
+                      <Input
+                        id={`edit-date-${game.id}`}
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        data-testid={`input-edit-date-${game.id}`}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`edit-time-${game.id}`}>Time</Label>
+                      <Input
+                        id={`edit-time-${game.id}`}
+                        type="time"
+                        value={editTime}
+                        onChange={(e) => setEditTime(e.target.value)}
+                        data-testid={`input-edit-time-${game.id}`}
+                      />
+                    </div>
+                    <div className="flex gap-2 items-end">
+                      <Button
+                        size="sm"
+                        onClick={() => updateTimeMutation.mutate({ id: game.id, date: editDate, time: editTime })}
+                        disabled={updateTimeMutation.isPending || !editDate || !editTime}
+                        data-testid={`button-save-time-${game.id}`}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingGameId(null);
+                          setEditDate("");
+                          setEditTime("");
+                        }}
+                        data-testid={`button-cancel-edit-${game.id}`}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <p className="font-semibold">{game.team2} vs {game.team1}</p>
-                <p className="text-sm text-muted-foreground">
-                  {format(new Date(game.gameTime), "MMM d, yyyy 'at' h:mm a")}
-                </p>
-              </div>
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => deleteMutation.mutate(game.id)}
-                disabled={deleteMutation.isPending}
-                data-testid={`button-delete-${game.id}`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              ) : (
+                <div className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge>Week {game.week}</Badge>
+                      {game.isLive && <Badge variant="default">LIVE</Badge>}
+                      {game.isFinal && <Badge variant="secondary">FINAL</Badge>}
+                    </div>
+                    <p className="font-semibold">{game.team2} vs {game.team1}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(game.gameTime), "MMM d, yyyy 'at' h:mm a")}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => {
+                        setEditingGameId(game.id);
+                        const date = game.gameTime.split('T')[0];
+                        const time = game.gameTime.split('T')[1]?.slice(0, 5) || "";
+                        setEditDate(date);
+                        setEditTime(time);
+                      }}
+                      data-testid={`button-edit-time-${game.id}`}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => deleteMutation.mutate(game.id)}
+                      disabled={deleteMutation.isPending}
+                      data-testid={`button-delete-${game.id}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
