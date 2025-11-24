@@ -10,8 +10,10 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: "/", label: "Scores" },
+    { path: "/scores", label: "Scores" },
     { path: "/schedule", label: "Schedule" },
+    { path: "/playoffs", label: "Playoffs" },
+    { path: "/standings", label: "Standings" },
     { path: "/previous-weeks", label: "Previous Weeks" },
     { path: "/news", label: "News" },
     { path: "/pickems", label: "Pick'ems" },
@@ -23,7 +25,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between gap-4">
           <Link href="/" data-testid="link-home">
             <h1 className="text-xl md:text-2xl font-bold text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md cursor-pointer">
-              NFL Fan Hub
+              BFFL Fan Hub
             </h1>
           </Link>
 

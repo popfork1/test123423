@@ -29,10 +29,10 @@ export default function Landing() {
       <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-20">
           <Badge className="mb-4 px-4 py-2" variant="outline">
-            NFL Season 2024
+            BFFL Season 1
           </Badge>
           <h1 className="text-5xl md:text-7xl font-black mb-6" data-testid="text-hero-title">
-            NFL Fan Hub
+            BFFL Fan Hub
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Your ultimate destination for live scores, real-time discussion, and everything NFL
@@ -217,7 +217,7 @@ export default function Landing() {
         {/* Footer CTA */}
         <div className="text-center py-12 border-t">
           <p className="text-lg text-muted-foreground mb-6">
-            Ready to manage your NFL content? Log in as admin to post games, news, and more.
+            Ready to manage your BFFL content? Log in as admin to post games, news, and more.
           </p>
           <a href="/api/login">
             <Button size="lg" data-testid="button-admin-login">

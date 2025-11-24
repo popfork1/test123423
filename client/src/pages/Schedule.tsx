@@ -23,10 +23,12 @@ export default function Schedule() {
   }
 
   const gamesByWeek = allGames?.reduce((acc, game) => {
-    if (!acc[game.week]) {
+    if (game.week <= 10 && !acc[game.week]) {
       acc[game.week] = [];
     }
-    acc[game.week].push(game);
+    if (game.week <= 10) {
+      acc[game.week].push(game);
+    }
     return acc;
   }, {} as Record<number, Game[]>) || {};
 
