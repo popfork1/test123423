@@ -34,8 +34,11 @@ export default function Landing() {
           <h1 className="text-5xl md:text-7xl font-black mb-6" data-testid="text-hero-title">
             BFFL Fan Hub
           </h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-2">
+            FFN Network
+          </p>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Your ultimate destination for live scores, real-time discussion, and everything NFL
+            Your ultimate destination for live scores, real-time discussion, and everything BFFL
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Button size="lg" onClick={() => setLocation("/scores")} className="gap-2" data-testid="button-view-scores">
