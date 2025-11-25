@@ -680,17 +680,6 @@ function NewsManager() {
           </div>
 
           <div>
-            <Label htmlFor="excerpt">Excerpt (Optional)</Label>
-            <Textarea
-              id="excerpt"
-              value={formData.excerpt}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              rows={2}
-              data-testid="input-news-excerpt"
-            />
-          </div>
-
-          <div>
             <Label htmlFor="content">Content</Label>
             <Textarea
               id="content"
@@ -699,6 +688,17 @@ function NewsManager() {
               rows={8}
               required
               data-testid="input-news-content"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="excerpt">Excerpt (Optional)</Label>
+            <Textarea
+              id="excerpt"
+              value={formData.excerpt}
+              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+              rows={2}
+              data-testid="input-news-excerpt"
             />
           </div>
 
