@@ -660,7 +660,7 @@ function NewsManager() {
       return;
     }
     const authorId = user?.id || "anonymous";
-    createMutation.mutate({ ...formData, content: formData.excerpt, authorId });
+    createMutation.mutate({ title: formData.title, content: formData.excerpt, authorId });
   };
 
   return (
