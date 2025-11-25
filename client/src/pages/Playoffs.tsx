@@ -48,8 +48,6 @@ export default function Playoffs() {
     { id: "r2_m3", round: 2, position: 2, team1: undefined, team2: undefined },
     // Round 3 (Championship) - 1 match
     { id: "r3_m1", round: 3, position: 0, team1: undefined, team2: undefined },
-    // Final - 1 match
-    { id: "final", round: 4, position: 0, team1: undefined, team2: undefined },
   ]);
 
   const updateMatch = (matchId: string, field: string, value: any) => {
@@ -142,12 +140,6 @@ export default function Playoffs() {
           <div className="flex flex-col gap-12 justify-center">
             <div className="text-xs font-bold text-center text-muted-foreground mb-2">Championship</div>
             {getMatches(3).map((m) => <MatchCard key={m.id} match={m} />)}
-          </div>
-
-          {/* FINAL - National Champion */}
-          <div className="flex flex-col gap-12 justify-center items-center">
-            <div className="text-sm font-bold text-center text-primary">National Champion</div>
-            {getMatches(4).map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
         </div>
       </div>
