@@ -386,6 +386,15 @@ function GamesManager() {
                       </Button>
                       <Button
                         size="sm"
+                        variant="destructive"
+                        onClick={() => updateTimeMutation.mutate({ id: game.id, date: "", time: "" })}
+                        disabled={updateTimeMutation.isPending}
+                        data-testid={`button-clear-time-${game.id}`}
+                      >
+                        Clear
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="outline"
                         onClick={() => {
                           setEditingGameId(null);
