@@ -243,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/playoffs/init", isAuthenticated, async (req, res) => {
+  app.post("/api/playoffs/init", async (req, res) => {
     try {
       const existing = await storage.getAllPlayoffMatches();
       if (existing.length > 0) {
@@ -305,7 +305,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/playoffs/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/playoffs/:id", async (req, res) => {
     try {
       const match = await storage.updatePlayoffMatch(req.params.id, req.body);
       res.json(match);
@@ -325,7 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/playoffs/reset", isAuthenticated, async (req, res) => {
+  app.post("/api/playoffs/reset", async (req, res) => {
     try {
       const matches = await storage.getAllPlayoffMatches();
       for (const match of matches) {
