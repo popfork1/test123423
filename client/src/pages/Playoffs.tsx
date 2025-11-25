@@ -69,33 +69,36 @@ export default function Playoffs() {
     { id: "r1_m2", round: 1, side: "right", position: 1, team1: undefined, team2: undefined },
     { id: "finals", round: 4, side: "left", position: 0, team1: undefined, team2: undefined },
   ]);
+  const [initialized, setInitialized] = useState(false);
 
   const { data: dbMatches, refetch: refetchMatches } = useQuery<PlayoffMatch[]>({
     queryKey: ["/api/playoffs"],
+    enabled: false,
   });
 
-  // Initialize playoff matches on first load
+  // Initialize and load bracket
   useEffect(() => {
-    if (isAuthenticated && (!dbMatches || dbMatches.length === 0)) {
-      apiRequest("POST", "/api/playoffs/init").then(() => {
-        refetchMatches();
-      }).catch((error) => {
+    const init = async () => {
+      if (!isAuthenticated || initialized) return;
+      try {
+        await apiRequest("POST", "/api/playoffs/init");
+        await refetchMatches();
+        setInitialized(true);
+      } catch (error) {
         console.error("Error initializing bracket:", error);
-      });
-    }
-  }, [isAuthenticated, dbMatches, refetchMatches]);
+      }
+    };
+    init();
+  }, [isAuthenticated, initialized, refetchMatches]);
 
-  // Load matches from database into bracket
+  // Update bracket when dbMatches loads
   useEffect(() => {
     if (!dbMatches || dbMatches.length === 0) return;
-
+    
     const newBracket = bracket.map((match) => {
       const round = getDBRound(match.round);
       const matchNumber = getMatchNumber(match.round, match.side, match.position);
-      
-      const dbMatch = dbMatches.find((m) => 
-        m.round === round && m.matchNumber === matchNumber
-      );
+      const dbMatch = dbMatches.find((m) => m.round === round && m.matchNumber === matchNumber);
       
       if (dbMatch) {
         return {
@@ -108,13 +111,11 @@ export default function Playoffs() {
       }
       return match;
     });
-    
     setBracket(newBracket);
   }, [dbMatches]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: { id: string; team1?: string; team2?: string; winner?: string }) => {
-      console.log("Saving match:", data);
       const res = await apiRequest("PATCH", `/api/playoffs/${data.id}`, {
         team1: data.team1 || null,
         team2: data.team2 || null,
@@ -124,16 +125,13 @@ export default function Playoffs() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
-    },
-    onError: (error) => {
-      console.error("Save failed:", error);
+      refetchMatches();
     },
   });
 
   const resetMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/playoffs/reset");
-      return res.json();
+      await apiRequest("POST", "/api/playoffs/reset");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
@@ -145,7 +143,10 @@ export default function Playoffs() {
     if (!isAuthenticated) return;
     
     const match = bracket.find((m) => m.id === matchId);
-    if (!match) return;
+    if (!match || !match.dbId) {
+      console.warn(`Match ${matchId} not found or no dbId:`, match);
+      return;
+    }
 
     const updatedBracket = bracket.map((m) =>
       m.id === matchId ? { ...m, [field]: value } : m
@@ -153,7 +154,7 @@ export default function Playoffs() {
     setBracket(updatedBracket);
 
     const updated = updatedBracket.find((m) => m.id === matchId);
-    if (updated?.dbId) {
+    if (updated) {
       updateMutation.mutate({
         id: updated.dbId,
         team1: updated.team1?.name,
@@ -164,7 +165,7 @@ export default function Playoffs() {
   };
 
   const handleReset = () => {
-    if (confirm("Are you sure you want to reset the entire bracket? This cannot be undone.")) {
+    if (confirm("Are you sure you want to reset the entire bracket?")) {
       resetMutation.mutate();
     }
   };
