@@ -36,7 +36,7 @@ const AVAILABLE_TEAMS = [
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
   const [bracket, setBracket] = useState<BracketMatch[]>([
-    // LEFT SIDE - Round 1 (3 matches)
+    // LEFT SIDE - Round 1 (3 matches - outermost)
     { id: "l1_m1", round: 1, side: "left", position: 0, team1: undefined, team2: undefined },
     { id: "l1_m2", round: 1, side: "left", position: 1, team1: undefined, team2: undefined },
     { id: "l1_m3", round: 1, side: "left", position: 2, team1: undefined, team2: undefined },
@@ -51,12 +51,12 @@ export default function Playoffs() {
     // RIGHT SIDE - Round 2 (2 matches)
     { id: "r2_m1", round: 2, side: "right", position: 0, team1: undefined, team2: undefined },
     { id: "r2_m2", round: 2, side: "right", position: 1, team1: undefined, team2: undefined },
-    // RIGHT SIDE - Round 1 (3 matches)
+    // RIGHT SIDE - Round 1 (3 matches - outermost)
     { id: "r1_m1", round: 1, side: "right", position: 0, team1: undefined, team2: undefined },
     { id: "r1_m2", round: 1, side: "right", position: 1, team1: undefined, team2: undefined },
     { id: "r1_m3", round: 1, side: "right", position: 2, team1: undefined, team2: undefined },
     
-    // FINALS
+    // FINALS (center)
     { id: "finals", round: 4, side: "left", position: 0, team1: undefined, team2: undefined },
   ]);
 
@@ -134,9 +134,9 @@ export default function Playoffs() {
 
       <div className="flex justify-center overflow-x-auto px-4">
         <div className="flex gap-12 items-center min-w-max">
-          {/* LEFT SIDE */}
-          <div className="flex flex-col gap-24">
-            {/* Round 1 */}
+          {/* LEFT SIDE - Outside to Inside */}
+          <div className="flex gap-8">
+            {/* Round 1 - Outermost */}
             <div className="flex flex-col gap-12">
               {getMatches(1, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
@@ -146,7 +146,7 @@ export default function Playoffs() {
               {getMatches(2, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
 
-            {/* Round 3 */}
+            {/* Round 3 - Innermost */}
             <div className="flex flex-col justify-center">
               {getMatches(3, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
@@ -158,9 +158,9 @@ export default function Playoffs() {
             {bracket.filter(m => m.id === "finals").map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
 
-          {/* RIGHT SIDE */}
-          <div className="flex flex-col gap-24">
-            {/* Round 3 */}
+          {/* RIGHT SIDE - Outside to Inside */}
+          <div className="flex gap-8">
+            {/* Round 3 - Innermost */}
             <div className="flex flex-col justify-center">
               {getMatches(3, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
@@ -170,7 +170,7 @@ export default function Playoffs() {
               {getMatches(2, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
             
-            {/* Round 1 */}
+            {/* Round 1 - Outermost */}
             <div className="flex flex-col gap-12">
               {getMatches(1, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
