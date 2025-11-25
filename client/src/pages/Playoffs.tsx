@@ -36,25 +36,25 @@ const AVAILABLE_TEAMS = [
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
   const [bracket, setBracket] = useState<BracketMatch[]>([
-    // LEFT SIDE - Round 1 First Round (3 matches)
+    // LEFT SIDE - Round 1 (3 matches)
     { id: "l1_m1", round: 1, side: "left", position: 0, team1: undefined, team2: undefined },
     { id: "l1_m2", round: 1, side: "left", position: 1, team1: undefined, team2: undefined },
     { id: "l1_m3", round: 1, side: "left", position: 2, team1: undefined, team2: undefined },
-    // LEFT SIDE - Round 2 Divisional (2 matches)
+    // LEFT SIDE - Round 2 (2 matches)
     { id: "l2_m1", round: 2, side: "left", position: 0, team1: undefined, team2: undefined },
     { id: "l2_m2", round: 2, side: "left", position: 1, team1: undefined, team2: undefined },
-    // LEFT SIDE - Round 3 Championship (1 match)
+    // LEFT SIDE - Round 3 (1 match)
     { id: "l3_m1", round: 3, side: "left", position: 0, team1: undefined, team2: undefined },
     
-    // RIGHT SIDE - Round 1 First Round (3 matches)
+    // RIGHT SIDE - Round 3 (1 match)
+    { id: "r3_m1", round: 3, side: "right", position: 0, team1: undefined, team2: undefined },
+    // RIGHT SIDE - Round 2 (2 matches)
+    { id: "r2_m1", round: 2, side: "right", position: 0, team1: undefined, team2: undefined },
+    { id: "r2_m2", round: 2, side: "right", position: 1, team1: undefined, team2: undefined },
+    // RIGHT SIDE - Round 1 (3 matches)
     { id: "r1_m1", round: 1, side: "right", position: 0, team1: undefined, team2: undefined },
     { id: "r1_m2", round: 1, side: "right", position: 1, team1: undefined, team2: undefined },
     { id: "r1_m3", round: 1, side: "right", position: 2, team1: undefined, team2: undefined },
-    // RIGHT SIDE - Round 2 Divisional (2 matches)
-    { id: "r2_m1", round: 2, side: "right", position: 0, team1: undefined, team2: undefined },
-    { id: "r2_m2", round: 2, side: "right", position: 1, team1: undefined, team2: undefined },
-    // RIGHT SIDE - Round 3 Championship (1 match)
-    { id: "r3_m1", round: 3, side: "right", position: 0, team1: undefined, team2: undefined },
     
     // FINALS
     { id: "finals", round: 4, side: "left", position: 0, team1: undefined, team2: undefined },
@@ -127,57 +127,51 @@ export default function Playoffs() {
 
   return (
     <div className="min-h-screen bg-background py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold" data-testid="text-page-title">College Football Playoff - 12 Team</h1>
-        <p className="text-muted-foreground text-sm">BFFL Season 1 - Championship Bracket</p>
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold" data-testid="text-page-title">College Football Playoff</h1>
+        <p className="text-muted-foreground text-sm">12 Team Bracket</p>
       </div>
 
       <div className="flex justify-center overflow-x-auto px-4">
-        <div className="flex gap-8 items-center min-w-max py-8">
+        <div className="flex gap-12 items-center min-w-max">
           {/* LEFT SIDE */}
-          <div className="flex flex-col gap-8">
-            {/* Left Round 1 - First Round */}
-            <div className="flex flex-col gap-16">
-              <div className="text-xs font-bold text-center text-muted-foreground">First Round</div>
+          <div className="flex flex-col gap-24">
+            {/* Round 1 */}
+            <div className="flex flex-col gap-12">
               {getMatches(1, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
             
-            {/* Left Round 2 - Divisional */}
-            <div className="flex flex-col gap-16 justify-center">
-              <div className="text-xs font-bold text-center text-muted-foreground">Divisional</div>
+            {/* Round 2 */}
+            <div className="flex flex-col gap-20 justify-center">
               {getMatches(2, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
 
-            {/* Left Round 3 - Championship */}
-            <div className="flex flex-col gap-16 justify-center">
-              <div className="text-xs font-bold text-center text-muted-foreground">Championship</div>
+            {/* Round 3 */}
+            <div className="flex flex-col justify-center">
               {getMatches(3, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
           </div>
 
-          {/* CENTER - Finals */}
-          <div className="flex flex-col items-center justify-center gap-4">
-            <div className="text-sm font-bold text-primary">FINALS</div>
+          {/* CENTER - FINALS */}
+          <div className="flex flex-col items-center justify-center gap-6">
+            <div className="text-lg font-bold text-primary">FINALS</div>
             {bracket.filter(m => m.id === "finals").map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
 
           {/* RIGHT SIDE */}
-          <div className="flex flex-col gap-8">
-            {/* Right Round 3 - Championship */}
-            <div className="flex flex-col gap-16 justify-center">
-              <div className="text-xs font-bold text-center text-muted-foreground">Championship</div>
+          <div className="flex flex-col gap-24">
+            {/* Round 3 */}
+            <div className="flex flex-col justify-center">
               {getMatches(3, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
 
-            {/* Right Round 2 - Divisional */}
-            <div className="flex flex-col gap-16 justify-center">
-              <div className="text-xs font-bold text-center text-muted-foreground">Divisional</div>
+            {/* Round 2 */}
+            <div className="flex flex-col gap-20 justify-center">
               {getMatches(2, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
             
-            {/* Right Round 1 - First Round */}
-            <div className="flex flex-col gap-16">
-              <div className="text-xs font-bold text-center text-muted-foreground">First Round</div>
+            {/* Round 1 */}
+            <div className="flex flex-col gap-12">
               {getMatches(1, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
           </div>
