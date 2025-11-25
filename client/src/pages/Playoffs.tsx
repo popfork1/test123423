@@ -123,10 +123,10 @@ export default function Playoffs() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold" data-testid="text-page-title">College Football Playoff</h1>
+        <h1 className="text-4xl font-bold" data-testid="text-page-title">BFFL Playoff Bracket
+</h1>
         <p className="text-muted-foreground text-sm">12 Team Bracket</p>
       </div>
-
       <div className="flex justify-center overflow-x-auto px-4">
         <div className="flex gap-4 items-center min-w-max">
           {/* LEFT SIDE - Outside to Inside */}
