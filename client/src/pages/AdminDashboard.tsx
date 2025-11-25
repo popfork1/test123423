@@ -210,7 +210,13 @@ function GamesManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim());
+    const validGames = gamesList.filter((g) => g.team1.trim() && g.team2.trim()).map((g) => {
+      // If date or time is empty, clear both to ensure gameTime stays null
+      if (!g.date || !g.time) {
+        return { ...g, date: "", time: "" };
+      }
+      return g;
+    });
     if (validGames.length === 0) {
       toast({ title: "Error", description: "Add at least one game with teams", variant: "destructive" });
       return;
