@@ -651,9 +651,19 @@ function NewsManager() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (user?.id) {
-      createMutation.mutate({ ...formData, authorId: user.id });
+    if (!formData.title.trim()) {
+      toast({ title: "Error", description: "Title is required", variant: "destructive" });
+      return;
     }
+    if (!formData.content.trim()) {
+      toast({ title: "Error", description: "Content is required", variant: "destructive" });
+      return;
+    }
+    if (!user?.id) {
+      toast({ title: "Error", description: "User not authenticated", variant: "destructive" });
+      return;
+    }
+    createMutation.mutate({ ...formData, authorId: user.id });
   };
 
   return (
@@ -695,10 +705,11 @@ function NewsManager() {
             />
           </div>
 
-          <Button type="submit" className="gap-2" disabled={createMutation.isPending} data-testid="button-post-news">
+          <Button type="submit" className="gap-2" disabled={createMutation.isPending || !user?.id} data-testid="button-post-news">
             <Plus className="w-4 h-4" />
             {createMutation.isPending ? "Posting..." : "Post News"}
           </Button>
+          {!user?.id && <p className="text-sm text-destructive">Loading user info...</p>}
         </form>
       </Card>
 

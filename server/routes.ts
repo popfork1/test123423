@@ -119,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(news);
     } catch (error) {
       console.error("Error creating news:", error);
-      res.status(400).json({ message: "Failed to create news" });
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create news" });
     }
   });
 
