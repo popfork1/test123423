@@ -354,6 +354,9 @@ function GamesManager() {
               {editingGameId === game.id ? (
                 <div className="p-4 border rounded-md bg-muted/30 space-y-3">
                   <p className="font-semibold">{game.team2} vs {game.team1}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {editDate && editTime ? `${editDate} at ${editTime}` : "Time TBD"}
+                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                       <Label htmlFor={`edit-date-${game.id}`}>Date</Label>
