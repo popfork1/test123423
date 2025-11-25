@@ -243,6 +243,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/playoffs/init", isAuthenticated, async (req, res) => {
+    try {
+      const existing = await storage.getAllPlayoffMatches();
+      if (existing.length > 0) {
+        return res.json({ success: true, message: "Bracket already initialized" });
+      }
+
+      // Initialize wildcard round (4 matches - 2 left, 2 right)
+      await storage.createPlayoffMatch({ round: "wildcard", matchNumber: 1 });
+      await storage.createPlayoffMatch({ round: "wildcard", matchNumber: 2 });
+      await storage.createPlayoffMatch({ round: "wildcard", matchNumber: 3 });
+      await storage.createPlayoffMatch({ round: "wildcard", matchNumber: 4 });
+
+      // Initialize divisional round (2 matches - 1 left, 1 right)
+      await storage.createPlayoffMatch({ round: "divisional", matchNumber: 1 });
+      await storage.createPlayoffMatch({ round: "divisional", matchNumber: 2 });
+
+      // Initialize conference round (2 matches - 1 left, 1 right)
+      await storage.createPlayoffMatch({ round: "conference", matchNumber: 1 });
+      await storage.createPlayoffMatch({ round: "conference", matchNumber: 2 });
+
+      // Initialize super bowl (1 match)
+      await storage.createPlayoffMatch({ round: "super_bowl", matchNumber: 1 });
+
+      res.json({ success: true, message: "Bracket initialized" });
+    } catch (error) {
+      console.error("Error initializing playoff bracket:", error);
+      res.status(400).json({ message: "Failed to initialize bracket" });
+    }
+  });
+
   app.get("/api/playoffs", async (req, res) => {
     try {
       const matches = await storage.getAllPlayoffMatches();
@@ -291,6 +322,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting playoff match:", error);
       res.status(400).json({ message: "Failed to delete playoff match" });
+    }
+  });
+
+  app.post("/api/playoffs/reset", isAuthenticated, async (req, res) => {
+    try {
+      const matches = await storage.getAllPlayoffMatches();
+      for (const match of matches) {
+        await storage.updatePlayoffMatch(match.id, {
+          team1: null,
+          team2: null,
+          winner: null,
+          isComplete: false,
+        });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resetting playoff bracket:", error);
+      res.status(400).json({ message: "Failed to reset bracket" });
     }
   });
 

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { RotateCcw } from "lucide-react";
 import type { PlayoffMatch } from "@shared/schema";
 
 interface BracketTeam {
@@ -41,12 +42,11 @@ const AVAILABLE_TEAMS = [
   "Buffalo Bills",
 ];
 
-// Map bracket position to database match number
 function getMatchNumber(round: number, side: "left" | "right", position: number): number {
   if (round === 1) return side === "left" ? position + 1 : position + 3;
   if (round === 2) return side === "left" ? 1 : 2;
   if (round === 3) return side === "left" ? 1 : 2;
-  return 1; // super bowl
+  return 1;
 }
 
 function getDBRound(round: number): string {
@@ -70,13 +70,24 @@ export default function Playoffs() {
     { id: "finals", round: 4, side: "left", position: 0, team1: undefined, team2: undefined },
   ]);
 
-  const { data: dbMatches } = useQuery<PlayoffMatch[]>({
+  const { data: dbMatches, refetch: refetchMatches } = useQuery<PlayoffMatch[]>({
     queryKey: ["/api/playoffs"],
   });
 
-  // Initialize matches and link to database
+  // Initialize playoff matches on first load
   useEffect(() => {
-    if (!dbMatches) return;
+    if (isAuthenticated && (!dbMatches || dbMatches.length === 0)) {
+      apiRequest("POST", "/api/playoffs/init").then(() => {
+        refetchMatches();
+      }).catch((error) => {
+        console.error("Error initializing bracket:", error);
+      });
+    }
+  }, [isAuthenticated, dbMatches, refetchMatches]);
+
+  // Load matches from database into bracket
+  useEffect(() => {
+    if (!dbMatches || dbMatches.length === 0) return;
 
     const newBracket = bracket.map((match) => {
       const round = getDBRound(match.round);
@@ -103,6 +114,7 @@ export default function Playoffs() {
 
   const updateMutation = useMutation({
     mutationFn: async (data: { id: string; team1?: string; team2?: string; winner?: string }) => {
+      console.log("Saving match:", data);
       const res = await apiRequest("PATCH", `/api/playoffs/${data.id}`, {
         team1: data.team1 || null,
         team2: data.team2 || null,
@@ -113,6 +125,20 @@ export default function Playoffs() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
     },
+    onError: (error) => {
+      console.error("Save failed:", error);
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/playoffs/reset");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
+      refetchMatches();
+    },
   });
 
   const updateMatch = (matchId: string, field: string, value: any) => {
@@ -121,13 +147,11 @@ export default function Playoffs() {
     const match = bracket.find((m) => m.id === matchId);
     if (!match) return;
 
-    // Update local state immediately
     const updatedBracket = bracket.map((m) =>
       m.id === matchId ? { ...m, [field]: value } : m
     );
     setBracket(updatedBracket);
 
-    // If we have a dbId, save to database
     const updated = updatedBracket.find((m) => m.id === matchId);
     if (updated?.dbId) {
       updateMutation.mutate({
@@ -136,6 +160,12 @@ export default function Playoffs() {
         team2: updated.team2?.name,
         winner: updated.winner,
       });
+    }
+  };
+
+  const handleReset = () => {
+    if (confirm("Are you sure you want to reset the entire bracket? This cannot be undone.")) {
+      resetMutation.mutate();
     }
   };
 
@@ -195,6 +225,19 @@ export default function Playoffs() {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold" data-testid="text-page-title">BFFL Playoff Bracket</h1>
         <p className="text-muted-foreground text-sm">12 Team Bracket</p>
+        {isAuthenticated && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleReset}
+            className="mt-4 gap-2"
+            data-testid="button-reset-bracket"
+            disabled={resetMutation.isPending}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Reset Bracket
+          </Button>
+        )}
       </div>
       <div className="flex justify-center overflow-x-auto px-4">
         <div className="flex gap-4 items-center min-w-max">
