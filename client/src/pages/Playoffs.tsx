@@ -1,204 +1,221 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-interface BracketTeam {
-  id: string;
-  name: string;
-}
-
-interface BracketMatch {
-  id: string;
-  team1?: BracketTeam;
-  team2?: BracketTeam;
-  winner?: string;
-  round: number;
-}
-
-const AVAILABLE_TEAMS = [
-  "Atlanta Falcons",
-  "Tampa Bay Buccaneers",
-  "Jacksonville Jaguars",
-  "Los Angeles Rams",
-  "Baltimore Ravens",
-  "Miami Dolphins",
-  "Chicago Bears",
-  "Houston Texans",
-  "New Orleans Saints",
-  "San Francisco 49ers",
-  "Kansas City Chiefs",
-  "Detroit Lions",
-  "Philadelphia Eagles",
-  "Arizona Cardinals",
-  "Dallas Cowboys",
-  "Buffalo Bills",
-];
+import { Trash2 } from "lucide-react";
+import type { PlayoffMatch } from "@shared/schema";
 
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
-  const [bracket, setBracket] = useState<BracketMatch[]>([
-    { id: "wc1", round: 1, team1: undefined, team2: undefined },
-    { id: "wc2", round: 1, team1: undefined, team2: undefined },
-    { id: "wc3", round: 1, team1: undefined, team2: undefined },
-    { id: "wc4", round: 1, team1: undefined, team2: undefined },
-    { id: "div1", round: 2, team1: undefined, team2: undefined },
-    { id: "div2", round: 2, team1: undefined, team2: undefined },
-    { id: "final", round: 3, team1: undefined, team2: undefined },
-  ]);
+  const { toast } = useToast();
 
-  const updateMatch = (matchId: string, field: string, value: any) => {
-    if (!isAuthenticated) return;
-    setBracket(
-      bracket.map((match) =>
-        match.id === matchId ? { ...match, [field]: value } : match
-      )
+  const { data: allMatches = [] } = useQuery<PlayoffMatch[]>({
+    queryKey: ["/api/playoffs"],
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (match: Partial<PlayoffMatch>) => {
+      await apiRequest("POST", "/api/playoffs", match);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
+      toast({ title: "Match created" });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<PlayoffMatch> }) => {
+      await apiRequest("PATCH", `/api/playoffs/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/playoffs/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
+    },
+  });
+
+  const setupPlayin = async () => {
+    for (let i = 1; i <= 4; i++) {
+      await createMutation.mutateAsync({
+        round: "play_in",
+        matchNumber: i,
+        seed1: 12 - i,
+        seed2: 5 + i,
+      });
+    }
+  };
+
+  const playinMatches = allMatches.filter(m => m.round === "play_in").sort((a, b) => a.matchNumber - b.matchNumber);
+  const wildcardMatches = allMatches.filter(m => m.round === "wildcard").sort((a, b) => a.matchNumber - b.matchNumber);
+  const divisionalMatches = allMatches.filter(m => m.round === "divisional").sort((a, b) => a.matchNumber - b.matchNumber);
+  const conferenceMatches = allMatches.filter(m => m.round === "conference").sort((a, b) => a.matchNumber - b.matchNumber);
+  const superBowlMatches = allMatches.filter(m => m.round === "super_bowl").sort((a, b) => a.matchNumber - b.matchNumber);
+
+  const MatchBox = ({ match, onUpdate, onDelete }: { match: PlayoffMatch; onUpdate: (data: Partial<PlayoffMatch>) => void; onDelete: () => void }) => (
+    <div className="border border-border rounded-md bg-card p-2 min-w-[160px] text-xs" data-testid={`card-match-${match.id}`}>
+      {isAuthenticated ? (
+        <div className="space-y-1">
+          <Input
+            size={1}
+            placeholder="Team 1"
+            value={match.team1 || ""}
+            onChange={(e) => onUpdate({ team1: e.target.value })}
+            className="text-xs h-6 p-1"
+            data-testid={`input-team1-${match.id}`}
+          />
+          <Input
+            size={1}
+            placeholder="Team 2"
+            value={match.team2 || ""}
+            onChange={(e) => onUpdate({ team2: e.target.value })}
+            className="text-xs h-6 p-1"
+            data-testid={`input-team2-${match.id}`}
+          />
+          <div className="flex gap-1">
+            <Input
+              type="number"
+              placeholder="S1"
+              value={match.team1Score || ""}
+              onChange={(e) => onUpdate({ team1Score: e.target.value ? parseInt(e.target.value) : null })}
+              className="text-xs h-6 p-1 w-10"
+              data-testid={`input-score1-${match.id}`}
+            />
+            <Input
+              type="number"
+              placeholder="S2"
+              value={match.team2Score || ""}
+              onChange={(e) => onUpdate({ team2Score: e.target.value ? parseInt(e.target.value) : null })}
+              className="text-xs h-6 p-1 w-10"
+              data-testid={`input-score2-${match.id}`}
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={onDelete}
+              className="h-6 w-6"
+              data-testid={`button-delete-${match.id}`}
+            >
+              <Trash2 className="w-3 h-3" />
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <div className="font-semibold">{match.team1 || `#${match.seed1}`}</div>
+          <div className="text-muted-foreground text-xs">vs</div>
+          <div className="font-semibold">{match.team2 || `#${match.seed2}`}</div>
+          {match.team1Score !== null && match.team2Score !== null && (
+            <div className="mt-1 text-xs font-bold">
+              {match.team1Score} - {match.team2Score}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  const RoundColumn = ({ 
+    matches, 
+    title, 
+    round 
+  }: { 
+    matches: PlayoffMatch[]; 
+    title: string; 
+    round: string;
+  }) => {
+    if (matches.length === 0 && !isAuthenticated) return null;
+    
+    return (
+      <div className="flex flex-col justify-center items-center gap-6 flex-shrink-0">
+        <div className="text-xs font-bold text-center uppercase tracking-wider text-muted-foreground">{title}</div>
+        <div className="flex flex-col justify-center gap-8" style={{ minHeight: `${Math.max(200, matches.length * 100)}px` }}>
+          {matches.map((match, idx) => {
+            const spacing = matches.length > 1 ? Math.pow(2, Math.log2(matches.length)) : 1;
+            return (
+              <div key={match.id} style={{ marginTop: idx === 0 ? 0 : `${(spacing - 1) * 3}rem` }}>
+                <MatchBox
+                  match={match}
+                  onUpdate={(data) => updateMutation.mutate({ id: match.id!, data })}
+                  onDelete={() => deleteMutation.mutate(match.id!)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
   };
 
-  const getMatchesForRound = (round: number) => {
-    return bracket.filter((m) => m.round === round);
-  };
-
-  const roundNames: Record<number, string> = {
-    1: "Wildcard",
-    2: "Divisional",
-    3: "Championship",
-  };
-
-  const usedTeams = bracket
-    .flatMap((m) => [m.team1?.name, m.team2?.name])
-    .filter(Boolean) as string[];
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background py-8">
+      <div className="max-w-full px-4">
         <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
+          <h1 className="text-4xl md:text-5xl font-black mb-2" data-testid="text-page-title">
             Playoff Bracket
           </h1>
-          <p className="text-muted-foreground text-lg">
-            BFFL Season 1 - 12 Team Playoff
-          </p>
+          <p className="text-muted-foreground">BFFL Season 1 - 12 Team Playoff Format</p>
         </div>
 
-        {isAuthenticated ? (
-          <div className="space-y-8">
-            {[1, 2, 3].map((round) => (
-              <Card key={round} className="p-6">
-                <h2 className="text-2xl font-bold mb-6">{roundNames[round]}</h2>
-                <div className="space-y-4">
-                  {getMatchesForRound(round).map((match) => (
-                    <div
-                      key={match.id}
-                      className="border rounded-lg p-4 bg-muted/30 space-y-3"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[1, 2].map((teamNum) => {
-                          const teamKey = (teamNum === 1 ? "team1" : "team2") as "team1" | "team2";
-                          const team = match[teamKey];
+        {isAuthenticated && playinMatches.length === 0 && (
+          <Button onClick={setupPlayin} className="mb-8" data-testid="button-setup-playoff">
+            Setup 12-Team Bracket (5v12, 6v11, 7v10, 8v9)
+          </Button>
+        )}
 
-                          return (
-                            <div key={teamNum}>
-                              <Label>Team {teamNum}</Label>
-                              <Input
-                                list={`teams-${match.id}-${teamNum}`}
-                                value={team?.name || ""}
-                                onChange={(e) => {
-                                  const newTeam = e.target.value
-                                    ? { id: `${match.id}-t${teamNum}`, name: e.target.value }
-                                    : undefined;
-                                  updateMatch(match.id, teamKey, newTeam);
-                                }}
-                                placeholder="Enter team name"
-                              />
-                              <datalist id={`teams-${match.id}-${teamNum}`}>
-                                {AVAILABLE_TEAMS.filter((t) => !usedTeams.includes(t) || team?.name === t).map(
-                                  (team) => (
-                                    <option key={team} value={team} />
-                                  )
-                                )}
-                              </datalist>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      {match.team1 && match.team2 && (
-                        <div className="pt-3 border-t">
-                          <Label className="mb-2 block">Winner</Label>
-                          <div className="flex gap-2">
-                            <Button
-                              variant={match.winner === match.team1.id ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => updateMatch(match.id, "winner", match.team1?.id)}
-                              className="flex-1"
-                            >
-                              {match.team1.name}
-                            </Button>
-                            <Button
-                              variant={match.winner === match.team2?.id ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => updateMatch(match.id, "winner", match.team2?.id)}
-                              className="flex-1"
-                            >
-                              {match.team2.name}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
+        {(playinMatches.length > 0 || isAuthenticated) && (
+          <div className="overflow-x-auto pb-8">
+            <div className="flex gap-6 justify-center items-stretch min-w-min px-4">
+              {/* Play-In Round */}
+              <RoundColumn matches={playinMatches} title="Play-In" round="play_in" />
+
+              {/* Wildcard Round */}
+              <RoundColumn matches={wildcardMatches} title="Wild Card" round="wildcard" />
+
+              {/* Divisional Round */}
+              <RoundColumn matches={divisionalMatches} title="Divisional" round="divisional" />
+
+              {/* Conference Championship */}
+              <RoundColumn matches={conferenceMatches} title="Conference" round="conference" />
+
+              {/* Super Bowl */}
+              <div className="flex flex-col justify-center items-center gap-6 flex-shrink-0">
+                <div className="text-xs font-bold text-center uppercase tracking-wider text-muted-foreground">Champion</div>
+                <div className="flex flex-col justify-center gap-8">
+                  {superBowlMatches.length > 0 ? (
+                    superBowlMatches.map((match) => (
+                      <MatchBox
+                        key={match.id}
+                        match={match}
+                        onUpdate={(data) => updateMutation.mutate({ id: match.id!, data })}
+                        onDelete={() => deleteMutation.mutate(match.id!)}
+                      />
+                    ))
+                  ) : isAuthenticated ? (
+                    <div className="border border-dashed border-muted-foreground rounded-md p-4 text-center text-muted-foreground text-xs w-40">
+                      Champion TBD
                     </div>
-                  ))}
+                  ) : null}
                 </div>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card className="p-8 overflow-x-auto">
-            <div className="min-w-max flex gap-8 justify-center">
-              {[1, 2, 3].map((round) => {
-                const matches = getMatchesForRound(round);
-                return (
-                  <div key={round} className="flex flex-col justify-center gap-4">
-                    <h3 className="text-center font-semibold text-sm mb-4">
-                      {roundNames[round]}
-                    </h3>
-                    <div className="flex flex-col gap-8 justify-center">
-                      {matches.map((match, idx) => {
-                        const spacing = Math.pow(2, round - 1);
-                        return (
-                          <div
-                            key={match.id}
-                            style={{
-                              marginTop: idx === 0 ? 0 : `${(spacing - 1) * 2}rem`,
-                            }}
-                          >
-                            <div className="bg-muted rounded border border-border min-w-[200px]">
-                              <div className="divide-y">
-                                <div className="p-3 text-sm font-medium">
-                                  {match.team1?.name || "TBD"}
-                                  {match.winner === match.team1?.id && (
-                                    <span className="ml-2 text-xs font-bold text-primary">✓</span>
-                                  )}
-                                </div>
-                                <div className="p-3 text-sm font-medium">
-                                  {match.team2?.name || "TBD"}
-                                  {match.winner === match.team2?.id && (
-                                    <span className="ml-2 text-xs font-bold text-primary">✓</span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+              </div>
             </div>
-          </Card>
+          </div>
+        )}
+
+        {playinMatches.length === 0 && !isAuthenticated && (
+          <div className="text-center py-12 text-muted-foreground">
+            Playoff bracket coming soon...
+          </div>
         )}
       </div>
     </div>
