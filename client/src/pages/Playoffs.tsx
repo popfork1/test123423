@@ -14,53 +14,42 @@ interface BracketMatch {
   team2?: BracketTeam;
   winner?: string;
   round: number;
-  side: "left" | "right";
+  position: number;
 }
 
 const AVAILABLE_TEAMS = [
-  "Atlanta Falcons",
-  "Tampa Bay Buccaneers",
-  "Jacksonville Jaguars",
-  "Los Angeles Rams",
-  "Baltimore Ravens",
-  "Miami Dolphins",
-  "Chicago Bears",
-  "Houston Texans",
-  "New Orleans Saints",
-  "San Francisco 49ers",
-  "Kansas City Chiefs",
-  "Detroit Lions",
-  "Philadelphia Eagles",
-  "Arizona Cardinals",
-  "Dallas Cowboys",
-  "Buffalo Bills",
+  "Oregon",
+  "Missouri",
+  "Michigan",
+  "Alabama",
+  "Florida State",
+  "Liberty",
+  "Penn State",
+  "Ohio State",
+  "Washington",
+  "Texas",
+  "Georgia",
+  "Ole Miss",
 ];
 
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
   const [bracket, setBracket] = useState<BracketMatch[]>([
-    // LEFT SIDE - 4 play-in matches
-    { id: "l_pi1", round: 1, side: "left", team1: undefined, team2: undefined },
-    { id: "l_pi2", round: 1, side: "left", team1: undefined, team2: undefined },
-    { id: "l_pi3", round: 1, side: "left", team1: undefined, team2: undefined },
-    { id: "l_pi4", round: 1, side: "left", team1: undefined, team2: undefined },
-    // LEFT SIDE - 2 divisional matches
-    { id: "l_div1", round: 2, side: "left", team1: undefined, team2: undefined },
-    { id: "l_div2", round: 2, side: "left", team1: undefined, team2: undefined },
-    // LEFT SIDE - 1 championship match
-    { id: "l_conf", round: 3, side: "left", team1: undefined, team2: undefined },
-    // RIGHT SIDE - 4 play-in matches
-    { id: "r_pi1", round: 1, side: "right", team1: undefined, team2: undefined },
-    { id: "r_pi2", round: 1, side: "right", team1: undefined, team2: undefined },
-    { id: "r_pi3", round: 1, side: "right", team1: undefined, team2: undefined },
-    { id: "r_pi4", round: 1, side: "right", team1: undefined, team2: undefined },
-    // RIGHT SIDE - 2 divisional matches
-    { id: "r_div1", round: 2, side: "right", team1: undefined, team2: undefined },
-    { id: "r_div2", round: 2, side: "right", team1: undefined, team2: undefined },
-    // RIGHT SIDE - 1 championship match
-    { id: "r_conf", round: 3, side: "right", team1: undefined, team2: undefined },
-    // SUPER BOWL
-    { id: "sb", round: 4, side: "left", team1: undefined, team2: undefined },
+    // Round 1 - 6 matches (seeds 6v11, 7v10, 8v9, 5v12, 4v13, 3v14 conceptually for 12-team)
+    { id: "r1_m1", round: 1, position: 0, team1: undefined, team2: undefined },
+    { id: "r1_m2", round: 1, position: 1, team1: undefined, team2: undefined },
+    { id: "r1_m3", round: 1, position: 2, team1: undefined, team2: undefined },
+    { id: "r1_m4", round: 1, position: 3, team1: undefined, team2: undefined },
+    { id: "r1_m5", round: 1, position: 4, team1: undefined, team2: undefined },
+    { id: "r1_m6", round: 1, position: 5, team1: undefined, team2: undefined },
+    // Round 2 - 3 matches
+    { id: "r2_m1", round: 2, position: 0, team1: undefined, team2: undefined },
+    { id: "r2_m2", round: 2, position: 1, team1: undefined, team2: undefined },
+    { id: "r2_m3", round: 2, position: 2, team1: undefined, team2: undefined },
+    // Round 3 (Championship) - 1 match
+    { id: "r3_m1", round: 3, position: 0, team1: undefined, team2: undefined },
+    // Final - 1 match
+    { id: "final", round: 4, position: 0, team1: undefined, team2: undefined },
   ]);
 
   const updateMatch = (matchId: string, field: string, value: any) => {
@@ -72,12 +61,12 @@ export default function Playoffs() {
     );
   };
 
-  const getMatches = (round: number, side: "left" | "right") => {
-    return bracket.filter((m) => m.round === round && m.side === side);
+  const getMatches = (round: number) => {
+    return bracket.filter((m) => m.round === round).sort((a, b) => a.position - b.position);
   };
 
   const MatchCard = ({ match }: { match: BracketMatch }) => (
-    <div className="bg-card border border-border rounded w-40 text-xs" data-testid={`card-match-${match.id}`}>
+    <div className="bg-card border border-border rounded w-48 text-xs" data-testid={`card-match-${match.id}`}>
       <div className="p-2 space-y-1">
         <div>
           {isAuthenticated ? (
@@ -131,52 +120,34 @@ export default function Playoffs() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold" data-testid="text-page-title">Playoff Bracket</h1>
-        <p className="text-muted-foreground text-sm">BFFL Season 1 - 12 Team Playoff</p>
+        <h1 className="text-4xl font-bold" data-testid="text-page-title">College Football Playoff - 12 Team</h1>
+        <p className="text-muted-foreground text-sm">BFFL Season 1 - Championship Bracket</p>
       </div>
 
       <div className="flex justify-center overflow-x-auto px-4">
-        <div className="flex gap-12 items-center min-w-max">
-          {/* LEFT SIDE - Flows up */}
-          <div className="flex flex-col gap-8">
-            {/* Round 1 */}
-            <div className="flex flex-col gap-20">
-              {getMatches(1, "left").map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
-            
-            {/* Round 2 */}
-            <div className="flex flex-col gap-32">
-              {getMatches(2, "left").map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
-            
-            {/* Round 3 */}
-            <div className="flex flex-col justify-center">
-              {getMatches(3, "left").map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
+        <div className="flex gap-16 items-center min-w-max py-8">
+          {/* ROUND 1 - 6 matches */}
+          <div className="flex flex-col gap-12 justify-center">
+            <div className="text-xs font-bold text-center text-muted-foreground mb-2">Round 1</div>
+            {getMatches(1).map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
 
-          {/* CENTER - Super Bowl */}
-          <div className="flex flex-col items-center gap-4">
-            <div className="text-xs font-bold text-muted-foreground">SUPER BOWL</div>
-            <MatchCard match={bracket.find(m => m.id === "sb")!} />
+          {/* ROUND 2 - 3 matches */}
+          <div className="flex flex-col gap-20 justify-center">
+            <div className="text-xs font-bold text-center text-muted-foreground mb-2">Round 2</div>
+            {getMatches(2).map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
 
-          {/* RIGHT SIDE - Flows down */}
-          <div className="flex flex-col gap-8">
-            {/* Round 3 */}
-            <div className="flex flex-col justify-center">
-              {getMatches(3, "right").map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
-            
-            {/* Round 2 */}
-            <div className="flex flex-col gap-32">
-              {getMatches(2, "right").map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
-            
-            {/* Round 1 */}
-            <div className="flex flex-col gap-20">
-              {getMatches(1, "right").map((m) => <MatchCard key={m.id} match={m} />)}
-            </div>
+          {/* ROUND 3 - Championship */}
+          <div className="flex flex-col gap-12 justify-center">
+            <div className="text-xs font-bold text-center text-muted-foreground mb-2">Championship</div>
+            {getMatches(3).map((m) => <MatchCard key={m.id} match={m} />)}
+          </div>
+
+          {/* FINAL - National Champion */}
+          <div className="flex flex-col gap-12 justify-center items-center">
+            <div className="text-sm font-bold text-center text-primary">National Champion</div>
+            {getMatches(4).map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
         </div>
       </div>

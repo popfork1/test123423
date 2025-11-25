@@ -35,40 +35,49 @@ export default function GameDetail() {
   }, [initialMessages]);
 
   useEffect(() => {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const hostname = window.location.hostname || "localhost";
-    const port = window.location.port ? `:${window.location.port}` : ":5000";
-    const wsUrl = `${protocol}//${hostname}${port}/ws`;
-    const socket = new WebSocket(wsUrl);
+    if (!gameId) return;
+    
+    try {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      
+      if (!hostname || !port) return;
+      
+      const wsUrl = `${protocol}//${hostname}:${port}/ws`;
+      const socket = new WebSocket(wsUrl);
 
-    socket.onopen = () => {
-      console.log("WebSocket connected");
-    };
+      socket.onopen = () => {
+        console.log("WebSocket connected");
+      };
 
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "chat" && (!gameId || data.gameId === gameId)) {
-          setChatMessages((prev) => [...prev, data.message]);
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "chat" && data.gameId === gameId) {
+            setChatMessages((prev) => [...prev, data.message]);
+          }
+        } catch (err) {
+          console.error("Failed to parse WebSocket message:", err);
         }
-      } catch (err) {
-        console.error("Failed to parse WebSocket message:", err);
-      }
-    };
+      };
 
-    socket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
 
-    socket.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+      socket.onclose = () => {
+        console.log("WebSocket disconnected");
+      };
 
-    wsRef.current = socket;
+      wsRef.current = socket;
 
-    return () => {
-      socket.close();
-    };
+      return () => {
+        socket.close();
+      };
+    } catch (err) {
+      console.error("Failed to establish WebSocket:", err);
+    }
   }, [gameId]);
 
   const handleSendMessage = (username: string, message: string) => {
