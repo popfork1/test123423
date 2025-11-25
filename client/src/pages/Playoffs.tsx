@@ -136,52 +136,46 @@ export default function Playoffs() {
       </div>
 
       <div className="flex justify-center overflow-x-auto px-4">
-        <div className="flex gap-20 items-start min-w-max">
+        <div className="flex gap-12 items-center min-w-max">
           {/* LEFT SIDE - Flows up */}
-          <div className="flex flex-col">
-            <div className="text-sm font-bold text-muted-foreground mb-8 text-center w-40">LEFT BRACKET</div>
-            <div className="flex flex-col gap-8">
-              {/* Round 1 */}
-              <div className="flex flex-col gap-20">
-                {getMatches(1, "left").map((m) => <MatchCard key={m.id} match={m} />)}
-              </div>
-              
-              {/* Round 2 */}
-              <div className="flex flex-col gap-32">
-                {getMatches(2, "left").map((m) => <MatchCard key={m.id} match={m} />)}
-              </div>
-              
-              {/* Round 3 */}
-              <div className="flex flex-col justify-center">
-                {getMatches(3, "left").map((m) => <MatchCard key={m.id} match={m} />)}
-              </div>
+          <div className="flex flex-col gap-8">
+            {/* Round 1 */}
+            <div className="flex flex-col gap-20">
+              {getMatches(1, "left").map((m) => <MatchCard key={m.id} match={m} />)}
+            </div>
+            
+            {/* Round 2 */}
+            <div className="flex flex-col gap-32">
+              {getMatches(2, "left").map((m) => <MatchCard key={m.id} match={m} />)}
+            </div>
+            
+            {/* Round 3 */}
+            <div className="flex flex-col justify-center">
+              {getMatches(3, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
           </div>
 
           {/* CENTER - Super Bowl */}
-          <div className="flex flex-col items-center">
-            <div className="text-sm font-bold text-muted-foreground mb-8">SUPER BOWL</div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="text-xs font-bold text-muted-foreground">SUPER BOWL</div>
             <MatchCard match={bracket.find(m => m.id === "sb")!} />
           </div>
 
           {/* RIGHT SIDE - Flows down */}
-          <div className="flex flex-col">
-            <div className="text-sm font-bold text-muted-foreground mb-8 text-center w-40">RIGHT BRACKET</div>
-            <div className="flex flex-col gap-8">
-              {/* Round 3 */}
-              <div className="flex flex-col justify-center">
-                {getMatches(3, "right").map((m) => <MatchCard key={m.id} match={m} />)}
-              </div>
-              
-              {/* Round 2 */}
-              <div className="flex flex-col gap-32">
-                {getMatches(2, "right").map((m) => <MatchCard key={m.id} match={m} />)}
-              </div>
-              
-              {/* Round 1 */}
-              <div className="flex flex-col gap-20">
-                {getMatches(1, "right").map((m) => <MatchCard key={m.id} match={m} />)}
-              </div>
+          <div className="flex flex-col gap-8">
+            {/* Round 3 */}
+            <div className="flex flex-col justify-center">
+              {getMatches(3, "right").map((m) => <MatchCard key={m.id} match={m} />)}
+            </div>
+            
+            {/* Round 2 */}
+            <div className="flex flex-col gap-32">
+              {getMatches(2, "right").map((m) => <MatchCard key={m.id} match={m} />)}
+            </div>
+            
+            {/* Round 1 */}
+            <div className="flex flex-col gap-20">
+              {getMatches(1, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
           </div>
         </div>
