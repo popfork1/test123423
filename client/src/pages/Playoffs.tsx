@@ -13,7 +13,7 @@ interface BracketTeam {
 
 interface BracketMatch {
   id: string;
-  dbId?: string; // database ID for saving
+  dbId?: string;
   team1?: BracketTeam;
   team2?: BracketTeam;
   winner?: string;
@@ -41,77 +41,66 @@ const AVAILABLE_TEAMS = [
   "Buffalo Bills",
 ];
 
-const ROUND_MAP: Record<string, { uiRound: number; side: "left" | "right"; positions: number }> = {
-  "wildcard_1_left": { uiRound: 1, side: "left", positions: 2 },
-  "wildcard_1_right": { uiRound: 1, side: "right", positions: 2 },
-  "divisional_2_left": { uiRound: 2, side: "left", positions: 1 },
-  "divisional_2_right": { uiRound: 2, side: "right", positions: 1 },
-  "conference_3_left": { uiRound: 3, side: "left", positions: 1 },
-  "conference_3_right": { uiRound: 3, side: "right", positions: 1 },
-  "super_bowl_4": { uiRound: 4, side: "left", positions: 1 },
-};
+// Map bracket position to database match number
+function getMatchNumber(round: number, side: "left" | "right", position: number): number {
+  if (round === 1) return side === "left" ? position + 1 : position + 3;
+  if (round === 2) return side === "left" ? 1 : 2;
+  if (round === 3) return side === "left" ? 1 : 2;
+  return 1; // super bowl
+}
 
-function getDBRoundKey(round: number, side: "left" | "right", position: number): string {
-  if (round === 1) return `wildcard_${round}_${side}`;
-  if (round === 2) return `divisional_${round}_${side}`;
-  if (round === 3) return `conference_${round}_${side}`;
-  return "super_bowl_4";
+function getDBRound(round: number): string {
+  if (round === 1) return "wildcard";
+  if (round === 2) return "divisional";
+  if (round === 3) return "conference";
+  return "super_bowl";
 }
 
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
   const [bracket, setBracket] = useState<BracketMatch[]>([
-    // LEFT SIDE - Round 1 (2 matches - outermost)
     { id: "l1_m1", round: 1, side: "left", position: 0, team1: undefined, team2: undefined },
     { id: "l1_m2", round: 1, side: "left", position: 1, team1: undefined, team2: undefined },
-    // LEFT SIDE - Round 2 (1 match)
     { id: "l2_m1", round: 2, side: "left", position: 0, team1: undefined, team2: undefined },
-    // LEFT SIDE - Round 3 (1 match)
     { id: "l3_m1", round: 3, side: "left", position: 0, team1: undefined, team2: undefined },
-    
-    // RIGHT SIDE - Round 3 (1 match)
     { id: "r3_m1", round: 3, side: "right", position: 0, team1: undefined, team2: undefined },
-    // RIGHT SIDE - Round 2 (1 match)
     { id: "r2_m1", round: 2, side: "right", position: 0, team1: undefined, team2: undefined },
-    // RIGHT SIDE - Round 1 (2 matches - outermost)
     { id: "r1_m1", round: 1, side: "right", position: 0, team1: undefined, team2: undefined },
     { id: "r1_m2", round: 1, side: "right", position: 1, team1: undefined, team2: undefined },
-    
-    // FINALS (center)
     { id: "finals", round: 4, side: "left", position: 0, team1: undefined, team2: undefined },
   ]);
 
-  // Load playoff matches from database
   const { data: dbMatches } = useQuery<PlayoffMatch[]>({
     queryKey: ["/api/playoffs"],
   });
 
-  // Initialize bracket from database on load
+  // Initialize matches and link to database
   useEffect(() => {
-    if (dbMatches && dbMatches.length > 0) {
-      const newBracket = bracket.map((match) => {
-        const dbMatch = dbMatches.find((m) => 
-          m.round === getDBRound(match.round) && 
-          m.matchNumber === match.position + 1 &&
-          (match.side === "left" ? m.matchNumber <= 4 : m.matchNumber > 4 || m.round === "super_bowl")
-        );
-        
-        if (dbMatch) {
-          return {
-            ...match,
-            dbId: dbMatch.id,
-            team1: dbMatch.team1 ? { id: `${match.id}-t1`, name: dbMatch.team1 } : undefined,
-            team2: dbMatch.team2 ? { id: `${match.id}-t2`, name: dbMatch.team2 } : undefined,
-            winner: dbMatch.winner,
-          };
-        }
-        return match;
-      });
-      setBracket(newBracket);
-    }
+    if (!dbMatches) return;
+
+    const newBracket = bracket.map((match) => {
+      const round = getDBRound(match.round);
+      const matchNumber = getMatchNumber(match.round, match.side, match.position);
+      
+      const dbMatch = dbMatches.find((m) => 
+        m.round === round && m.matchNumber === matchNumber
+      );
+      
+      if (dbMatch) {
+        return {
+          ...match,
+          dbId: dbMatch.id,
+          team1: dbMatch.team1 ? { id: `${match.id}-t1`, name: dbMatch.team1 } : undefined,
+          team2: dbMatch.team2 ? { id: `${match.id}-t2`, name: dbMatch.team2 } : undefined,
+          winner: dbMatch.winner,
+        };
+      }
+      return match;
+    });
+    
+    setBracket(newBracket);
   }, [dbMatches]);
 
-  // Mutation for updating playoff matches
   const updateMutation = useMutation({
     mutationFn: async (data: { id: string; team1?: string; team2?: string; winner?: string }) => {
       const res = await apiRequest("PATCH", `/api/playoffs/${data.id}`, {
@@ -126,29 +115,23 @@ export default function Playoffs() {
     },
   });
 
-  function getDBRound(round: number): string {
-    if (round === 1) return "wildcard";
-    if (round === 2) return "divisional";
-    if (round === 3) return "conference";
-    return "super_bowl";
-  }
-
   const updateMatch = (matchId: string, field: string, value: any) => {
     if (!isAuthenticated) return;
     
     const match = bracket.find((m) => m.id === matchId);
-    if (!match || !match.dbId) return;
+    if (!match) return;
 
+    // Update local state immediately
     const updatedBracket = bracket.map((m) =>
       m.id === matchId ? { ...m, [field]: value } : m
     );
     setBracket(updatedBracket);
 
-    // Save to database
+    // If we have a dbId, save to database
     const updated = updatedBracket.find((m) => m.id === matchId);
-    if (updated) {
+    if (updated?.dbId) {
       updateMutation.mutate({
-        id: match.dbId,
+        id: updated.dbId,
         team1: updated.team1?.name,
         team2: updated.team2?.name,
         winner: updated.winner,
@@ -215,48 +198,39 @@ export default function Playoffs() {
       </div>
       <div className="flex justify-center overflow-x-auto px-4">
         <div className="flex gap-4 items-center min-w-max">
-          {/* LEFT SIDE - Outside to Inside */}
           <div className="flex gap-2">
-            {/* Round 1 - Outermost */}
             <div className="flex flex-col gap-32">
               <div className="text-xs font-bold text-muted-foreground text-center mb-2">WILDCARD</div>
               {getMatches(1, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
             
-            {/* Round 2 */}
             <div className="flex flex-col gap-40 justify-center">
               <div className="text-xs font-bold text-muted-foreground text-center mb-2">DIVISIONAL</div>
               {getMatches(2, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
 
-            {/* Round 3 - Innermost */}
             <div className="flex flex-col justify-center">
               <div className="text-xs font-bold text-muted-foreground text-center mb-2">CONFERENCE</div>
               {getMatches(3, "left").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
           </div>
 
-          {/* CENTER - FINALS */}
           <div className="flex flex-col items-center justify-center gap-6">
             <div className="text-lg font-bold text-primary">SUPER BOWL</div>
             {bracket.filter(m => m.id === "finals").map((m) => <MatchCard key={m.id} match={m} />)}
           </div>
 
-          {/* RIGHT SIDE - Outside to Inside */}
           <div className="flex gap-2">
-            {/* Round 3 - Innermost */}
             <div className="flex flex-col justify-center">
               <div className="text-xs font-bold text-muted-foreground text-center mb-2">CONFERENCE</div>
               {getMatches(3, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
 
-            {/* Round 2 */}
             <div className="flex flex-col gap-40 justify-center">
               <div className="text-xs font-bold text-muted-foreground text-center mb-2">DIVISIONAL</div>
               {getMatches(2, "right").map((m) => <MatchCard key={m.id} match={m} />)}
             </div>
             
-            {/* Round 1 - Outermost */}
             <div className="flex flex-col gap-32">
               <div className="text-xs font-bold text-muted-foreground text-center mb-2">WILDCARD</div>
               {getMatches(1, "right").map((m) => <MatchCard key={m.id} match={m} />)}
