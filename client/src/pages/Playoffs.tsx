@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import type { PlayoffMatch } from "@shared/schema";
 
 interface BracketTeam {
   id: string;
@@ -10,6 +13,7 @@ interface BracketTeam {
 
 interface BracketMatch {
   id: string;
+  dbId?: string; // database ID for saving
   team1?: BracketTeam;
   team2?: BracketTeam;
   winner?: string;
@@ -37,6 +41,23 @@ const AVAILABLE_TEAMS = [
   "Buffalo Bills",
 ];
 
+const ROUND_MAP: Record<string, { uiRound: number; side: "left" | "right"; positions: number }> = {
+  "wildcard_1_left": { uiRound: 1, side: "left", positions: 2 },
+  "wildcard_1_right": { uiRound: 1, side: "right", positions: 2 },
+  "divisional_2_left": { uiRound: 2, side: "left", positions: 1 },
+  "divisional_2_right": { uiRound: 2, side: "right", positions: 1 },
+  "conference_3_left": { uiRound: 3, side: "left", positions: 1 },
+  "conference_3_right": { uiRound: 3, side: "right", positions: 1 },
+  "super_bowl_4": { uiRound: 4, side: "left", positions: 1 },
+};
+
+function getDBRoundKey(round: number, side: "left" | "right", position: number): string {
+  if (round === 1) return `wildcard_${round}_${side}`;
+  if (round === 2) return `divisional_${round}_${side}`;
+  if (round === 3) return `conference_${round}_${side}`;
+  return "super_bowl_4";
+}
+
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
   const [bracket, setBracket] = useState<BracketMatch[]>([
@@ -60,13 +81,79 @@ export default function Playoffs() {
     { id: "finals", round: 4, side: "left", position: 0, team1: undefined, team2: undefined },
   ]);
 
+  // Load playoff matches from database
+  const { data: dbMatches } = useQuery<PlayoffMatch[]>({
+    queryKey: ["/api/playoffs"],
+  });
+
+  // Initialize bracket from database on load
+  useEffect(() => {
+    if (dbMatches && dbMatches.length > 0) {
+      const newBracket = bracket.map((match) => {
+        const dbMatch = dbMatches.find((m) => 
+          m.round === getDBRound(match.round) && 
+          m.matchNumber === match.position + 1 &&
+          (match.side === "left" ? m.matchNumber <= 4 : m.matchNumber > 4 || m.round === "super_bowl")
+        );
+        
+        if (dbMatch) {
+          return {
+            ...match,
+            dbId: dbMatch.id,
+            team1: dbMatch.team1 ? { id: `${match.id}-t1`, name: dbMatch.team1 } : undefined,
+            team2: dbMatch.team2 ? { id: `${match.id}-t2`, name: dbMatch.team2 } : undefined,
+            winner: dbMatch.winner,
+          };
+        }
+        return match;
+      });
+      setBracket(newBracket);
+    }
+  }, [dbMatches]);
+
+  // Mutation for updating playoff matches
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: string; team1?: string; team2?: string; winner?: string }) => {
+      const res = await apiRequest("PATCH", `/api/playoffs/${data.id}`, {
+        team1: data.team1 || null,
+        team2: data.team2 || null,
+        winner: data.winner || null,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/playoffs"] });
+    },
+  });
+
+  function getDBRound(round: number): string {
+    if (round === 1) return "wildcard";
+    if (round === 2) return "divisional";
+    if (round === 3) return "conference";
+    return "super_bowl";
+  }
+
   const updateMatch = (matchId: string, field: string, value: any) => {
     if (!isAuthenticated) return;
-    setBracket(
-      bracket.map((match) =>
-        match.id === matchId ? { ...match, [field]: value } : match
-      )
+    
+    const match = bracket.find((m) => m.id === matchId);
+    if (!match || !match.dbId) return;
+
+    const updatedBracket = bracket.map((m) =>
+      m.id === matchId ? { ...m, [field]: value } : m
     );
+    setBracket(updatedBracket);
+
+    // Save to database
+    const updated = updatedBracket.find((m) => m.id === matchId);
+    if (updated) {
+      updateMutation.mutate({
+        id: match.dbId,
+        team1: updated.team1?.name,
+        team2: updated.team2?.name,
+        winner: updated.winner,
+      });
+    }
   };
 
   const getMatches = (round: number, side: "left" | "right") => {
@@ -123,8 +210,7 @@ export default function Playoffs() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold" data-testid="text-page-title">BFFL Playoff Bracket
-</h1>
+        <h1 className="text-4xl font-bold" data-testid="text-page-title">BFFL Playoff Bracket</h1>
         <p className="text-muted-foreground text-sm">12 Team Bracket</p>
       </div>
       <div className="flex justify-center overflow-x-auto px-4">
