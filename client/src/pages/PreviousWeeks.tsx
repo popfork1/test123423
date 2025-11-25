@@ -22,7 +22,7 @@ export default function PreviousWeeks() {
     queryKey: ["/api/games/all"],
   });
 
-  const weeks = Array.from({ length: 10 }, (_, i) => i + 1);
+  const weeks = Array.from({ length: 14 }, (_, i) => i + 1);
 
   const gamesByWeek = allGames?.reduce((acc, game) => {
     if (!acc[game.week]) {
@@ -92,16 +92,19 @@ export default function PreviousWeeks() {
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {weeks.map((week) => (
-            <Button
-              key={week}
-              variant={selectedWeek === week ? "default" : "outline"}
-              onClick={() => setSelectedWeek(week)}
-              data-testid={`button-week-${week}`}
-            >
-              Week {week}
-            </Button>
-          ))}
+          {weeks.map((week) => {
+            const roundName = week === 11 ? "Wildcard" : week === 12 ? "Divisional" : week === 13 ? "Conference" : week === 14 ? "Super Bowl" : `Week ${week}`;
+            return (
+              <Button
+                key={week}
+                variant={selectedWeek === week ? "default" : "outline"}
+                onClick={() => setSelectedWeek(week)}
+                data-testid={`button-week-${week}`}
+              >
+                {roundName}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
