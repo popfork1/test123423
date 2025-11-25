@@ -655,12 +655,12 @@ function NewsManager() {
       toast({ title: "Error", description: "Title is required", variant: "destructive" });
       return;
     }
-    if (!formData.content.trim()) {
-      toast({ title: "Error", description: "Content is required", variant: "destructive" });
+    if (!formData.excerpt.trim()) {
+      toast({ title: "Error", description: "Excerpt is required", variant: "destructive" });
       return;
     }
     const authorId = user?.id || "anonymous";
-    createMutation.mutate({ ...formData, authorId });
+    createMutation.mutate({ ...formData, content: formData.excerpt, authorId });
   };
 
   return (
@@ -680,25 +680,14 @@ function NewsManager() {
           </div>
 
           <div>
-            <Label htmlFor="excerpt">Excerpt (Optional)</Label>
+            <Label htmlFor="excerpt">Excerpt</Label>
             <Textarea
               id="excerpt"
               value={formData.excerpt}
               onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              rows={2}
-              data-testid="input-news-excerpt"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              rows={8}
+              rows={6}
               required
-              data-testid="input-news-content"
+              data-testid="input-news-excerpt"
             />
           </div>
 
