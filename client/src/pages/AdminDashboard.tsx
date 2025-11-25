@@ -705,11 +705,10 @@ function NewsManager() {
             />
           </div>
 
-          <Button type="submit" className="gap-2" disabled={createMutation.isPending || !user?.id} data-testid="button-post-news">
+          <Button type="submit" className="gap-2" disabled={createMutation.isPending} data-testid="button-post-news">
             <Plus className="w-4 h-4" />
             {createMutation.isPending ? "Posting..." : "Post News"}
           </Button>
-          {!user?.id && <p className="text-sm text-destructive">Loading user info...</p>}
         </form>
       </Card>
 
