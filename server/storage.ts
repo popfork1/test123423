@@ -7,6 +7,7 @@ import {
   pickemRules,
   standings,
   playoffMatches,
+  changelogs,
   type User,
   type UpsertUser,
   type Game,
@@ -23,6 +24,8 @@ import {
   type InsertStandings,
   type PlayoffMatch,
   type InsertPlayoffMatch,
+  type Changelog,
+  type InsertChangelog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -63,6 +66,10 @@ export interface IStorage {
   createPlayoffMatch(match: InsertPlayoffMatch): Promise<PlayoffMatch>;
   updatePlayoffMatch(id: string, match: Partial<PlayoffMatch>): Promise<PlayoffMatch>;
   deletePlayoffMatch(id: string): Promise<void>;
+  
+  getAllChangelogs(): Promise<Changelog[]>;
+  createChangelog(changelog: InsertChangelog): Promise<Changelog>;
+  deleteChangelog(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -257,6 +264,19 @@ export class DatabaseStorage implements IStorage {
 
   async deletePlayoffMatch(id: string): Promise<void> {
     await db.delete(playoffMatches).where(eq(playoffMatches.id, id));
+  }
+
+  async getAllChangelogs(): Promise<Changelog[]> {
+    return await db.select().from(changelogs).orderBy(desc(changelogs.createdAt));
+  }
+
+  async createChangelog(changelogData: InsertChangelog): Promise<Changelog> {
+    const [changelog] = await db.insert(changelogs).values(changelogData).returning();
+    return changelog;
+  }
+
+  async deleteChangelog(id: string): Promise<void> {
+    await db.delete(changelogs).where(eq(changelogs.id, id));
   }
 }
 

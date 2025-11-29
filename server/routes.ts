@@ -11,6 +11,7 @@ import {
   insertPickemRulesSchema,
   insertStandingsSchema,
   insertPlayoffMatchSchema,
+  insertChangelogSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -340,6 +341,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error resetting playoff bracket:", error);
       res.status(400).json({ message: "Failed to reset bracket" });
+    }
+  });
+
+  // Changelogs routes
+  app.get("/api/changelogs", async (req, res) => {
+    try {
+      const changelogs = await storage.getAllChangelogs();
+      res.json(changelogs);
+    } catch (error) {
+      console.error("Error fetching changelogs:", error);
+      res.status(500).json({ message: "Failed to fetch changelogs" });
+    }
+  });
+
+  app.post("/api/changelogs", isAuthenticated, async (req, res) => {
+    try {
+      const changelogData = insertChangelogSchema.parse(req.body);
+      const changelog = await storage.createChangelog(changelogData);
+      res.json(changelog);
+    } catch (error) {
+      console.error("Error creating changelog:", error);
+      res.status(400).json({ message: "Failed to create changelog" });
+    }
+  });
+
+  app.delete("/api/changelogs/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteChangelog(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting changelog:", error);
+      res.status(400).json({ message: "Failed to delete changelog" });
     }
   });
 

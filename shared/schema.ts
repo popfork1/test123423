@@ -179,3 +179,25 @@ export const insertPlayoffMatchSchema = createInsertSchema(playoffMatches).omit(
 
 export type InsertPlayoffMatch = z.infer<typeof insertPlayoffMatchSchema>;
 export type PlayoffMatch = typeof playoffMatches.$inferSelect;
+
+// Changelogs table
+export const changelogs = pgTable("changelogs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  version: varchar("version", { length: 20 }).notNull().unique(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  status: varchar("status", { length: 50 }).notNull(), // "NEW", "IMPROVED", "FIXED", "DESIGN"
+  changes: text("changes").notNull(), // JSON array stringified
+  date: varchar("date", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertChangelogSchema = createInsertSchema(changelogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertChangelog = z.infer<typeof insertChangelogSchema>;
+export type Changelog = typeof changelogs.$inferSelect;
