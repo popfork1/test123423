@@ -139,7 +139,7 @@ export default function GameDetail() {
                 className={`text-lg px-4 py-2 ${game.isLive ? 'animate-pulse' : ''}`}
                 data-testid="badge-game-status"
               >
-                {game.isLive ? "LIVE" : game.isFinal ? "FINAL" : game.quarter}
+                {game.isLive ? `LIVE${game.quarter && game.quarter !== "Scheduled" ? ` - ${game.quarter}` : ""}` : game.isFinal ? "FINAL" : game.quarter || "Scheduled"}
               </Badge>
               <span className="text-sm text-muted-foreground" data-testid="text-game-time">
                 {game.gameTime ? formatInTimeZone(new Date(game.gameTime), "America/New_York", "EEEE, MMMM d 'at' h:mm a 'EST'") : "Time TBD"}

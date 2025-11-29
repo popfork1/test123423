@@ -26,7 +26,7 @@ export function GameCard({ game, onClick }: GameCardProps) {
             className={game.isLive ? "animate-pulse" : ""}
             data-testid={`badge-status-${game.id}`}
           >
-            {game.isLive ? "LIVE" : game.isFinal ? "FINAL" : game.quarter}
+            {game.isLive ? `LIVE${game.quarter && game.quarter !== "Scheduled" ? ` - ${game.quarter}` : ""}` : game.isFinal ? "FINAL" : game.quarter || "Scheduled"}
           </Badge>
           <span className="text-xs text-muted-foreground" data-testid={`text-gametime-${game.id}`}>
             {game.gameTime ? formatInTimeZone(new Date(game.gameTime), "America/New_York", "EEE, MMM d 'at' h:mm a 'EST'") : "Time TBD"}
