@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Github, Twitter, Linkedin, Mail, Link2 } from "lucide-react";
+import { Music, Youtube } from "lucide-react";
 
 interface SocialLink {
   title: string;
@@ -40,6 +41,20 @@ export default function SocialLinks() {
       url: "mailto:contact@bffl.com",
       color: "hover:text-red-500",
     },
+    {
+      title: "Discord",
+      description: "Join our Discord community",
+      icon: <Music className="w-8 h-8" />,
+      url: "https://discord.gg",
+      color: "hover:text-indigo-500",
+    },
+    {
+      title: "YouTube",
+      description: "Subscribe to our YouTube channel",
+      icon: <Youtube className="w-8 h-8" />,
+      url: "https://youtube.com/@bffl",
+      color: "hover:text-red-600",
+    },
   ];
 
   return (
@@ -53,7 +68,7 @@ export default function SocialLinks() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-12">
         {socialLinks.map((link) => (
           <Card
             key={link.title}
