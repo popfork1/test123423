@@ -50,7 +50,7 @@ export default function GameDetail() {
     document.body.appendChild(container);
 
     // Create falling confetti
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 200; i++) {
       setTimeout(() => {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
@@ -61,7 +61,7 @@ export default function GameDetail() {
         piece.style.height = (Math.random() * 12 + 4) + 'px';
         piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '20%';
         container.appendChild(piece);
-      }, i * 30);
+      }, i * 10);
     }
 
     setTimeout(() => {
