@@ -13,9 +13,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { Game, News as NewsType, Pickem, PickemRules, Changelog, InsertChangelog } from "@shared/schema";
 import { format } from "date-fns";
 import { Plus, Trash2, Edit, Save } from "lucide-react";
+
+const STATUS_DEFINITIONS: Record<string, string> = {
+  NEW: "New features added",
+  IMPROVED: "Improvements to existing features",
+  FIXED: "Bug fixes",
+  DESIGN: "Design changes",
+};
 
 const AVAILABLE_TEAMS = [
   "Atlanta Falcons",
@@ -961,44 +969,19 @@ function RulesManager() {
 
 function ChangelogManager() {
   const { toast } = useToast();
-  const [version, setVersion] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<string[]>(["NEW"]);
-  const [changes, setChanges] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   const { data: changelogs = [] } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
   });
 
-  const createMutation = useMutation({
-    mutationFn: async (data: InsertChangelog) => {
-      await apiRequest("POST", "/api/changelogs", data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/changelogs"] });
-      toast({ title: "Success", description: "Changelog created successfully" });
-      setVersion("");
-      setTitle("");
-      setDescription("");
-      setStatus(["NEW"]);
-      setChanges("");
-      setDate(new Date().toISOString().split('T')[0]);
-    },
-    onError: (error: Error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => window.location.href = "/api/login", 500);
-        return;
-      }
-      toast({ title: "Error", description: "Failed to create changelog", variant: "destructive" });
-    },
-  });
+  const getNextVersion = (): string => {
+    if (changelogs.length === 0) return "1.0.0";
+    const versions = changelogs.map(c => c.version).sort();
+    const latest = versions[versions.length - 1];
+    const parts = latest.split('.').map(Number);
+    parts[2]++; // Increment patch version
+    return parts.join('.');
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -1022,157 +1005,55 @@ function ChangelogManager() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!version || !title || !date) {
-      toast({ title: "Error", description: "Please fill in all required fields", variant: "destructive" });
-      return;
-    }
-    
-    const changeList = changes.split('\n').filter(line => line.trim());
-    createMutation.mutate({
-      version,
-      title,
-      description,
-      status: JSON.stringify(status),
-      changes: JSON.stringify(changeList),
-      date,
-    });
-  };
-
-  const toggleStatus = (value: string) => {
-    setStatus(prev => 
-      prev.includes(value) 
-        ? prev.filter(s => s !== value)
-        : [...prev, value]
-    );
-  };
-
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Create New Changelog</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="version">Version *</Label>
-              <Input
-                id="version"
-                value={version}
-                onChange={(e) => setVersion(e.target.value)}
-                placeholder="e.g., 1.0.0"
-                required
-                data-testid="input-version"
-              />
-            </div>
-            <div>
-              <Label htmlFor="date">Date *</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                data-testid="input-date"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., Major Update"
-              required
-              data-testid="input-title"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional description of the update"
-              rows={3}
-              data-testid="input-description"
-            />
-          </div>
-
-          <div>
-            <Label>Status Tags</Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {["NEW", "IMPROVED", "FIXED", "DESIGN"].map(s => (
-                <Badge
-                  key={s}
-                  variant={status.includes(s) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleStatus(s)}
-                  data-testid={`badge-status-${s}`}
-                >
-                  {s}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="changes">Changes (one per line) *</Label>
-            <Textarea
-              id="changes"
-              value={changes}
-              onChange={(e) => setChanges(e.target.value)}
-              placeholder="- Added new feature&#10;- Fixed bug&#10;- Improved performance"
-              rows={6}
-              required
-              data-testid="input-changes"
-            />
-          </div>
-
-          <Button type="submit" className="gap-2" disabled={createMutation.isPending} data-testid="button-create-changelog">
-            <Plus className="w-4 h-4" />
-            {createMutation.isPending ? "Creating..." : "Create Changelog"}
-          </Button>
-        </form>
-      </Card>
-
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold mb-4">Recent Changelogs</h2>
+        <h2 className="text-2xl font-bold mb-4">Changelogs</h2>
         <div className="space-y-3">
-          {changelogs.map((changelog) => (
-            <div key={changelog.id} className="flex items-start justify-between p-3 border rounded-md">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-bold">{changelog.version}</span>
-                  <span className="text-sm text-muted-foreground">{changelog.date}</span>
+          {changelogs.length === 0 ? (
+            <p className="text-muted-foreground">No changelogs yet. Next version will be: {getNextVersion()}</p>
+          ) : (
+            changelogs.map((changelog) => (
+              <div key={changelog.id} className="flex items-start justify-between p-3 border rounded-md">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold">{changelog.version}</span>
+                    <span className="text-sm text-muted-foreground">{changelog.date}</span>
+                  </div>
+                  <p className="font-semibold mb-1">{changelog.title}</p>
+                  {changelog.description && <p className="text-sm text-muted-foreground mb-2">{changelog.description}</p>}
+                  <div className="flex gap-1 flex-wrap mb-2">
+                    {JSON.parse(changelog.status).map((s: string) => (
+                      <Tooltip key={s}>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="text-xs cursor-help">
+                            {s}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{STATUS_DEFINITIONS[s] || s}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </div>
+                  <ul className="text-sm space-y-1">
+                    {JSON.parse(changelog.changes).map((change: string, idx: number) => (
+                      <li key={idx} className="text-muted-foreground">{change}</li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="font-semibold mb-1">{changelog.title}</p>
-                {changelog.description && <p className="text-sm text-muted-foreground mb-2">{changelog.description}</p>}
-                <div className="flex gap-1 flex-wrap mb-2">
-                  {JSON.parse(changelog.status).map((s: string) => (
-                    <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
-                  ))}
-                </div>
-                <ul className="text-sm space-y-1">
-                  {JSON.parse(changelog.changes).map((change: string, idx: number) => (
-                    <li key={idx} className="text-muted-foreground">{change}</li>
-                  ))}
-                </ul>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => deleteMutation.mutate(changelog.id)}
+                  disabled={deleteMutation.isPending}
+                  data-testid={`button-delete-changelog-${changelog.id}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => deleteMutation.mutate(changelog.id)}
-                disabled={deleteMutation.isPending}
-                data-testid={`button-delete-changelog-${changelog.id}`}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </Card>
     </div>
