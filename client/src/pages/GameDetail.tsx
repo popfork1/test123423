@@ -58,6 +58,16 @@ export default function GameDetail() {
     }
   }, [initialMessages]);
 
+  // Cleanup confetti when component unmounts
+  useEffect(() => {
+    return () => {
+      confettiTimeoutsRef.current.forEach(timeoutId => clearTimeout(timeoutId));
+      confettiTimeoutsRef.current = [];
+      const containers = document.querySelectorAll('.confetti-container');
+      containers.forEach(container => container.remove());
+    };
+  }, []);
+
   useEffect(() => {
     if (game?.isFinal && !celebrationTriggered) {
       setCelebrationTriggered(true);
