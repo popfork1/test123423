@@ -291,11 +291,37 @@
 @keyframes fall {
   0% {
     opacity: 1;
-    transform: translateY(-100px) rotate(0deg) scale(1);
+    transform: translateY(-100px) translateX(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(25vh) translateX(100px) rotate(180deg) scale(1);
+  }
+  50% {
+    transform: translateY(50vh) translateX(-80px) rotate(360deg) scale(1);
+  }
+  75% {
+    transform: translateY(75vh) translateX(60px) rotate(540deg) scale(0.8);
   }
   100% {
     opacity: 0;
-    transform: translateY(100vh) rotate(720deg) scale(0);
+    transform: translateY(100vh) translateX(-40px) rotate(720deg) scale(0);
+  }
+}
+
+@keyframes fall-fast {
+  0% {
+    opacity: 1;
+    transform: translateY(-100px) translateX(0) rotate(0deg) scale(1);
+  }
+  30% {
+    transform: translateY(35vh) translateX(120px) rotate(270deg) scale(1);
+  }
+  60% {
+    transform: translateY(70vh) translateX(-100px) rotate(540deg) scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) translateX(80px) rotate(900deg) scale(0);
   }
 }
 
@@ -321,9 +347,16 @@
 }
 
 .confetti-piece {
-  animation: fall 5s ease-in forwards;
   display: inline-block;
   position: fixed;
+}
+
+.confetti-piece:nth-child(odd) {
+  animation: fall 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.confetti-piece:nth-child(even) {
+  animation: fall-fast 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .celebration-score {
