@@ -286,3 +286,39 @@
     inset: -1px;
   }
 }
+
+/* Celebration animations */
+@keyframes fall {
+  0% {
+    opacity: 1;
+    transform: translateY(-10px) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(100vh) rotate(360deg);
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.confetti {
+  position: fixed;
+  pointer-events: none;
+  top: 0;
+}
+
+.confetti-piece {
+  animation: fall 2.5s ease-in forwards;
+  display: inline-block;
+}
+
+.celebration-score {
+  animation: pulse-scale 0.6s ease-out;
+}

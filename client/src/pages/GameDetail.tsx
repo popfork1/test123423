@@ -16,6 +16,7 @@ export default function GameDetail() {
   const [, params] = useRoute("/game/:id");
   const gameId = params?.id;
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [celebrationTriggered, setCelebrationTriggered] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
 
   const { data: game, isLoading: gameLoading, error: gameError } = useQuery<Game>({
@@ -34,6 +35,37 @@ export default function GameDetail() {
       setChatMessages(initialMessages);
     }
   }, [initialMessages]);
+
+  useEffect(() => {
+    if (game?.isFinal && !celebrationTriggered) {
+      setCelebrationTriggered(true);
+      createConfetti();
+    }
+  }, [game?.isFinal, celebrationTriggered]);
+
+  const createConfetti = () => {
+    const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+    const container = document.createElement('div');
+    container.className = 'confetti';
+    document.body.appendChild(container);
+
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = (Math.random() * 10 + 5) + 'px';
+        piece.style.height = (Math.random() * 10 + 5) + 'px';
+        piece.style.borderRadius = '50%';
+        container.appendChild(piece);
+      }, i * 30);
+    }
+
+    setTimeout(() => {
+      container.remove();
+    }, 2800);
+  };
 
   useEffect(() => {
     if (!gameId) return;
@@ -156,7 +188,7 @@ export default function GameDetail() {
                     {game.team2}
                   </h2>
                 </div>
-                <div className={`text-6xl md:text-7xl font-black tabular-nums flex-shrink-0 ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team2-score">
+                <div className={`text-6xl md:text-7xl font-black tabular-nums flex-shrink-0 ${game.team2Score! > game.team1Score! && game.isFinal ? 'text-primary celebration-score' : ''}`} data-testid="text-team2-score">
                   {game.team2Score}
                 </div>
               </div>
@@ -170,7 +202,7 @@ export default function GameDetail() {
                     {game.team1}
                   </h2>
                 </div>
-                <div className={`text-6xl md:text-7xl font-black tabular-nums flex-shrink-0 ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary' : ''}`} data-testid="text-team1-score">
+                <div className={`text-6xl md:text-7xl font-black tabular-nums flex-shrink-0 ${game.team1Score! > game.team2Score! && game.isFinal ? 'text-primary celebration-score' : ''}`} data-testid="text-team1-score">
                   {game.team1Score}
                 </div>
               </div>
