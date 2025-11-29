@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { GameCard } from "@/components/GameCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { TEAMS } from "@/lib/nflTeams";
 import type { Game } from "@shared/schema";
 import { useLocation } from "wouter";
 import { AlertCircle } from "lucide-react";
@@ -43,6 +44,9 @@ export default function PreviousWeeks() {
   };
 
   const GameCardCompact = ({ game }: { game: Game }) => {
+    const team1Logo = TEAMS[game.team1 as keyof typeof TEAMS];
+    const team2Logo = TEAMS[game.team2 as keyof typeof TEAMS];
+
     return (
       <Link href={`/game/${game.id}`}>
         <Card className="p-3 hover-elevate cursor-pointer min-w-44" data-testid={`card-game-${game.id}`}>
@@ -54,10 +58,16 @@ export default function PreviousWeeks() {
             >
               {game.isLive ? "LIVE" : game.isFinal ? "FINAL" : "Scheduled"}
             </Badge>
-            <div className="text-sm font-semibold" data-testid={`text-matchup-${game.id}`}>
-              <div className="truncate">{game.team1}</div>
-              <div className="text-center my-1 text-xs">vs</div>
-              <div className="truncate">{game.team2}</div>
+            <div className="text-sm font-semibold flex flex-col gap-1" data-testid={`text-matchup-${game.id}`}>
+              <div className="flex items-center gap-2 min-w-0">
+                {team1Logo && <img src={team1Logo} alt={game.team1} className="w-5 h-5 object-contain flex-shrink-0" />}
+                <div className="truncate text-xs">{game.team1}</div>
+              </div>
+              <div className="text-center text-xs text-muted-foreground">vs</div>
+              <div className="flex items-center gap-2 min-w-0">
+                {team2Logo && <img src={team2Logo} alt={game.team2} className="w-5 h-5 object-contain flex-shrink-0" />}
+                <div className="truncate text-xs">{game.team2}</div>
+              </div>
             </div>
             {game.isFinal && (
               <div className="text-sm text-muted-foreground font-semibold text-center" data-testid={`text-score-${game.id}`}>
