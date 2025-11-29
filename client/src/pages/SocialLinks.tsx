@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link2 } from "lucide-react";
-import { Music, Youtube } from "lucide-react";
+import { Link2, Mail, Music, Youtube } from "lucide-react";
 
 interface SocialLink {
   title: string;
