@@ -59,14 +59,14 @@ export default function PreviousWeeks() {
               {game.isLive ? "LIVE" : game.isFinal ? "FINAL" : "Scheduled"}
             </Badge>
             <div className="text-sm font-semibold flex flex-col gap-1" data-testid={`text-matchup-${game.id}`}>
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="flex items-center gap-2 min-w-0">
                 {team1Logo && <img src={team1Logo} alt={game.team1} className="w-5 h-5 object-contain flex-shrink-0" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                <div className="text-xs">{game.team1}</div>
+                <div className="truncate text-xs">{game.team1}</div>
               </div>
               <div className="text-center text-xs text-muted-foreground">vs</div>
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="flex items-center gap-2 min-w-0">
                 {team2Logo && <img src={team2Logo} alt={game.team2} className="w-5 h-5 object-contain flex-shrink-0" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                <div className="text-xs">{game.team2}</div>
+                <div className="truncate text-xs">{game.team2}</div>
               </div>
             </div>
             {game.isFinal && (

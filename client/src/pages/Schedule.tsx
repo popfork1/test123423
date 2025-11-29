@@ -87,14 +87,14 @@ export default function Schedule() {
                           </div>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 font-semibold text-lg" data-testid={`text-matchup-${game.id}`}>
-                              <div className="flex items-center gap-1 min-w-0 flex-1">
+                              <div className="flex items-center gap-1 min-w-0">
                                 {TEAMS[game.team2 as keyof typeof TEAMS] && <img src={TEAMS[game.team2 as keyof typeof TEAMS]} alt={game.team2} className="w-6 h-6 object-contain flex-shrink-0" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                                <span>{game.team2}</span>
+                                <span className="truncate">{game.team2}</span>
                               </div>
                               <span className="text-xs text-muted-foreground flex-shrink-0">vs</span>
-                              <div className="flex items-center gap-1 min-w-0 flex-1">
+                              <div className="flex items-center gap-1 min-w-0">
                                 {TEAMS[game.team1 as keyof typeof TEAMS] && <img src={TEAMS[game.team1 as keyof typeof TEAMS]} alt={game.team1} className="w-6 h-6 object-contain flex-shrink-0" onError={(e) => e.currentTarget.style.display = 'none'} />}
-                                <span>{game.team1}</span>
+                                <span className="truncate">{game.team1}</span>
                               </div>
                             </div>
                             {game.isFinal && (
