@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link2, Youtube } from "lucide-react";
+import { Link2, Youtube, MessageSquare } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
 
 interface SocialLink {
@@ -63,6 +63,33 @@ export default function SocialLinks() {
             </Button>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-16 mb-12">
+        <h2 className="text-3xl font-bold mb-8" data-testid="text-feedback-title">
+          Send Feedback
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card
+            className="p-8 flex flex-col items-center text-center hover-elevate cursor-pointer"
+            onClick={() => window.open("https://docs.google.com/forms/d/e/1FAIpQLSeACYEIlsdu900cuQY8REcZXPgI01XQdVJDDR3d-g3r96GO9Q/viewform?usp=dialog", "_blank")}
+            data-testid="card-feedback"
+          >
+            <div className="mb-4 transition-colors hover:text-blue-500">
+              <MessageSquare className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold mb-2" data-testid="text-feedback">
+              Share Your Feedback
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6 flex-1">
+              Help us improve! Let us know what you think about BFFL
+            </p>
+            <Button variant="outline" size="sm" className="gap-2" data-testid="button-feedback">
+              <Link2 className="w-4 h-4" />
+              Open Form
+            </Button>
+          </Card>
+        </div>
       </div>
     </div>
   );
