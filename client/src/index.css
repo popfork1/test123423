@@ -291,34 +291,107 @@
 @keyframes fall {
   0% {
     opacity: 1;
-    transform: translateY(-10px) rotate(0deg);
+    transform: translateY(-100px) rotate(0deg) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translateY(100vh) rotate(360deg);
+    transform: translateY(100vh) rotate(720deg) scale(0);
   }
 }
 
-@keyframes pulse-scale {
+@keyframes burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0);
+  }
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-150px) scale(1.5);
+  }
+}
+
+@keyframes flash {
   0%, 100% {
-    transform: scale(1);
+    opacity: 0;
   }
   50% {
-    transform: scale(1.1);
+    opacity: 1;
   }
 }
 
-.confetti {
+@keyframes bounce-scale {
+  0% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 0px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+}
+
+.confetti-container {
   position: fixed;
   pointer-events: none;
   top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
 }
 
 .confetti-piece {
-  animation: fall 2.5s ease-in forwards;
+  animation: fall 3s ease-in forwards;
   display: inline-block;
+  position: fixed;
+}
+
+.burst-piece {
+  animation: burst 1.5s ease-out forwards;
+  display: inline-block;
+  position: fixed;
+}
+
+.float-piece {
+  animation: float-up 2s ease-out forwards;
+  display: inline-block;
+  position: fixed;
+}
+
+.flash-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%);
+  animation: flash 0.5s ease-out forwards;
+  pointer-events: none;
+  z-index: 9998;
 }
 
 .celebration-score {
-  animation: pulse-scale 0.6s ease-out;
+  animation: bounce-scale 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), glow-pulse 1s ease-in-out infinite !important;
+  transform-origin: center;
 }
