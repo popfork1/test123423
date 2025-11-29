@@ -192,6 +192,31 @@ export default async function runApp(
         )
       `);
       
+      // Create changelogs table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS changelogs (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          version VARCHAR(20) NOT NULL UNIQUE,
+          title VARCHAR(200) NOT NULL,
+          description TEXT,
+          status TEXT NOT NULL,
+          changes TEXT NOT NULL,
+          date VARCHAR(50) NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      
+      // Create predictions table
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS predictions (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          game_id VARCHAR NOT NULL,
+          voted_for VARCHAR(100) NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      
       console.log('Database schema initialized successfully');
     }
   } catch (error: any) {
