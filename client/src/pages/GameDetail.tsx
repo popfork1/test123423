@@ -1,16 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChatComponent } from "@/components/ChatComponent";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Game, ChatMessage } from "@shared/schema";
+import type { Game, ChatMessage, Prediction } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { TEAMS } from "@/lib/teams";
+import { apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function GameDetail() {
   const [, params] = useRoute("/game/:id");
@@ -18,6 +21,7 @@ export default function GameDetail() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [celebrationTriggered, setCelebrationTriggered] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const { user } = useAuth();
 
   const { data: game, isLoading: gameLoading, error: gameError } = useQuery<Game>({
     queryKey: ["/api/games", gameId],
@@ -28,6 +32,29 @@ export default function GameDetail() {
   const { data: initialMessages } = useQuery<ChatMessage[]>({
     queryKey: ["/api/chat", gameId],
     enabled: !!gameId,
+  });
+
+  const { data: predictions } = useQuery<Prediction[]>({
+    queryKey: ["/api/predictions", gameId],
+    enabled: !!gameId,
+  });
+
+  const { data: userPrediction } = useQuery<Prediction | null>({
+    queryKey: ["/api/predictions", gameId, user?.id],
+    enabled: !!gameId && !!user?.id,
+  });
+
+  const voteMutation = useMutation({
+    mutationFn: async (teamVote: string) => {
+      return await apiRequest("POST", "/api/predictions", {
+        gameId: gameId,
+        votedFor: teamVote,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/predictions", gameId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/predictions", gameId, user?.id] });
+    },
   });
 
   useEffect(() => {
@@ -217,6 +244,38 @@ export default function GameDetail() {
                 <p className="text-muted-foreground" data-testid="text-game-location">
                   <span className="font-semibold">Location:</span> {game.location}
                 </p>
+              </div>
+            )}
+
+            {!game.isFinal && !isScheduled && (
+              <div className="pt-4 border-t">
+                <p className="font-semibold mb-4">Make a Prediction</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant={userPrediction?.votedFor === game.team2 ? "default" : "outline"}
+                    className="gap-2"
+                    onClick={() => voteMutation.mutate(game.team2)}
+                    disabled={voteMutation.isPending}
+                    data-testid={`button-predict-${game.team2}`}
+                  >
+                    {game.team2}
+                    <Badge variant="secondary" className="ml-auto">
+                      {predictions?.filter(p => p.votedFor === game.team2).length || 0}
+                    </Badge>
+                  </Button>
+                  <Button
+                    variant={userPrediction?.votedFor === game.team1 ? "default" : "outline"}
+                    className="gap-2"
+                    onClick={() => voteMutation.mutate(game.team1)}
+                    disabled={voteMutation.isPending}
+                    data-testid={`button-predict-${game.team1}`}
+                  >
+                    {game.team1}
+                    <Badge variant="secondary" className="ml-auto">
+                      {predictions?.filter(p => p.votedFor === game.team1).length || 0}
+                    </Badge>
+                  </Button>
+                </div>
               </div>
             )}
           </div>

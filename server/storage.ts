@@ -8,6 +8,7 @@ import {
   standings,
   playoffMatches,
   changelogs,
+  predictions,
   type User,
   type UpsertUser,
   type Game,
@@ -26,6 +27,8 @@ import {
   type InsertPlayoffMatch,
   type Changelog,
   type InsertChangelog,
+  type Prediction,
+  type InsertPrediction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -70,6 +73,10 @@ export interface IStorage {
   getAllChangelogs(): Promise<Changelog[]>;
   createChangelog(changelog: InsertChangelog): Promise<Changelog>;
   deleteChangelog(id: string): Promise<void>;
+  
+  getPredictionsByGameId(gameId: string): Promise<Prediction[]>;
+  createPrediction(prediction: InsertPrediction): Promise<Prediction>;
+  getUserPredictionForGame(gameId: string, userId: string): Promise<Prediction | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -277,6 +284,23 @@ export class DatabaseStorage implements IStorage {
 
   async deleteChangelog(id: string): Promise<void> {
     await db.delete(changelogs).where(eq(changelogs.id, id));
+  }
+
+  async getPredictionsByGameId(gameId: string): Promise<Prediction[]> {
+    return await db.select().from(predictions).where(eq(predictions.gameId, gameId));
+  }
+
+  async createPrediction(predictionData: InsertPrediction): Promise<Prediction> {
+    const [prediction] = await db.insert(predictions).values(predictionData).returning();
+    return prediction;
+  }
+
+  async getUserPredictionForGame(gameId: string, userId: string): Promise<Prediction | undefined> {
+    const [prediction] = await db
+      .select()
+      .from(predictions)
+      .where(and(eq(predictions.gameId, gameId), eq(predictions.userId, userId)));
+    return prediction;
   }
 }
 

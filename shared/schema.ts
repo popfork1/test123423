@@ -201,3 +201,20 @@ export const insertChangelogSchema = createInsertSchema(changelogs).omit({
 
 export type InsertChangelog = z.infer<typeof insertChangelogSchema>;
 export type Changelog = typeof changelogs.$inferSelect;
+
+// Predictions/Votes table
+export const predictions = pgTable("predictions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gameId: varchar("game_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  votedFor: varchar("voted_for", { length: 100 }).notNull(), // team name
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPredictionSchema = createInsertSchema(predictions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPrediction = z.infer<typeof insertPredictionSchema>;
+export type Prediction = typeof predictions.$inferSelect;

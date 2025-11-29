@@ -12,6 +12,7 @@ import {
   insertStandingsSchema,
   insertPlayoffMatchSchema,
   insertChangelogSchema,
+  insertPredictionSchema,
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -373,6 +374,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting changelog:", error);
       res.status(400).json({ message: "Failed to delete changelog" });
+    }
+  });
+
+  app.get("/api/predictions/game/:gameId", async (req, res) => {
+    try {
+      const predictions = await storage.getPredictionsByGameId(req.params.gameId);
+      res.json(predictions);
+    } catch (error) {
+      console.error("Error fetching predictions:", error);
+      res.status(500).json({ message: "Failed to fetch predictions" });
+    }
+  });
+
+  app.post("/api/predictions", async (req, res) => {
+    try {
+      const userId = (req.user as any)?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const predictionData = insertPredictionSchema.parse({ ...req.body, userId });
+      const prediction = await storage.createPrediction(predictionData);
+      res.json(prediction);
+    } catch (error) {
+      console.error("Error creating prediction:", error);
+      res.status(400).json({ message: "Failed to create prediction" });
+    }
+  });
+
+  app.get("/api/predictions/:gameId/:userId", async (req, res) => {
+    try {
+      const prediction = await storage.getUserPredictionForGame(req.params.gameId, req.params.userId);
+      res.json(prediction || null);
+    } catch (error) {
+      console.error("Error fetching user prediction:", error);
+      res.status(500).json({ message: "Failed to fetch prediction" });
     }
   });
 
