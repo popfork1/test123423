@@ -9,8 +9,19 @@ import { Plus, Zap, Bug, Palette, Trash2 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Changelog } from "@shared/schema";
+
+const calculateNextVersion = (changelogs: Changelog[]): string => {
+  if (changelogs.length === 0) return "1.0";
+  
+  const latestVersion = changelogs[0].version;
+  const parts = latestVersion.split(".");
+  const major = parseInt(parts[0], 10);
+  const minor = parseInt(parts[1], 10);
+  
+  return `${major}.${minor + 1}`;
+};
 
 export default function Changelogs() {
   const { isAuthenticated } = useAuth();
@@ -25,6 +36,13 @@ export default function Changelogs() {
   const { data: dbChangelogs = [], isLoading } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
   });
+
+  useEffect(() => {
+    if (showForm) {
+      const nextVersion = calculateNextVersion(dbChangelogs);
+      setVersion(nextVersion);
+    }
+  }, [showForm, dbChangelogs]);
 
   const createMutation = useMutation({
     mutationFn: async () => {
@@ -120,14 +138,15 @@ export default function Changelogs() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="version">Version *</Label>
+                <Label htmlFor="version">Version (auto-generated) *</Label>
                 <Input
                   id="version"
-                  placeholder="1.4.0"
                   value={version}
-                  onChange={(e) => setVersion(e.target.value)}
+                  disabled
+                  className="bg-muted cursor-not-allowed"
                   data-testid="input-version"
                 />
+                <p className="text-xs text-muted-foreground mt-1">Next version: {version}</p>
               </div>
               <div>
                 <Label htmlFor="status">Status *</Label>
