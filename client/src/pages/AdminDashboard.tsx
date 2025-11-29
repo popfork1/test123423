@@ -972,6 +972,19 @@ function ChangelogManager() {
     queryKey: ["/api/changelogs"],
   });
 
+  // Auto-calculate next version
+  useEffect(() => {
+    if (changelogs.length === 0) {
+      setVersion("1.0");
+    } else {
+      const latestVersion = changelogs[0].version;
+      const parts = latestVersion.split(".");
+      const major = parseInt(parts[0], 10);
+      const minor = parseInt(parts[1], 10);
+      setVersion(`${major}.${minor + 1}`);
+    }
+  }, [changelogs]);
+
   const createMutation = useMutation({
     mutationFn: async (data: InsertChangelog) => {
       await apiRequest("POST", "/api/changelogs", data);
@@ -1055,15 +1068,15 @@ function ChangelogManager() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="version">Version *</Label>
+              <Label htmlFor="version">Version (auto-generated) *</Label>
               <Input
                 id="version"
                 value={version}
-                onChange={(e) => setVersion(e.target.value)}
-                placeholder="e.g., 1.0.0"
-                required
+                disabled
+                className="bg-muted cursor-not-allowed"
                 data-testid="input-version"
               />
+              <p className="text-xs text-muted-foreground mt-1">Next version: {version}</p>
             </div>
             <div>
               <Label htmlFor="date">Date *</Label>
@@ -1103,18 +1116,27 @@ function ChangelogManager() {
           </div>
 
           <div>
-            <Label>Status Tags</Label>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {["NEW", "IMPROVED", "FIXED", "DESIGN"].map(s => (
-                <Badge
-                  key={s}
-                  variant={status.includes(s) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleStatus(s)}
-                  data-testid={`badge-status-${s}`}
-                >
-                  {s}
-                </Badge>
+            <Label>Status Tags (select all that apply) *</Label>
+            <div className="space-y-2 mt-2">
+              {[
+                { value: "NEW", label: "NEW - New feature or functionality" },
+                { value: "IMPROVED", label: "IMPROVED - Enhancement to existing feature" },
+                { value: "FIXED", label: "FIXED - Bug fix or issue resolution" },
+                { value: "DESIGN", label: "DESIGN - Visual or UI changes" },
+              ].map(s => (
+                <div key={s.value} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id={`status-${s.value}`}
+                    checked={status.includes(s.value)}
+                    onChange={() => toggleStatus(s.value)}
+                    className="rounded border border-input"
+                    data-testid={`checkbox-status-${s.value.toLowerCase()}`}
+                  />
+                  <Label htmlFor={`status-${s.value}`} className="cursor-pointer font-normal">
+                    {s.label}
+                  </Label>
+                </div>
               ))}
             </div>
           </div>

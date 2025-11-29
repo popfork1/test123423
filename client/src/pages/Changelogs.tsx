@@ -25,55 +25,9 @@ const calculateNextVersion = (changelogs: Changelog[]): string => {
 
 export default function Changelogs() {
   const { isAuthenticated } = useAuth();
-  const [showForm, setShowForm] = useState(false);
-  const [version, setVersion] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [statuses, setStatuses] = useState<("NEW" | "IMPROVED" | "FIXED" | "DESIGN")[]>([]);
-  const [changesText, setChangesText] = useState("");
-  const [date, setDate] = useState(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }));
-
-  const toggleStatus = (s: "NEW" | "IMPROVED" | "FIXED" | "DESIGN") => {
-    setStatuses(prev => 
-      prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]
-    );
-  };
 
   const { data: dbChangelogs = [], isLoading } = useQuery<Changelog[]>({
     queryKey: ["/api/changelogs"],
-  });
-
-  useEffect(() => {
-    if (showForm) {
-      const nextVersion = calculateNextVersion(dbChangelogs);
-      setVersion(nextVersion);
-    }
-  }, [showForm, dbChangelogs]);
-
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      if (!version || !title || !changesText || statuses.length === 0) {
-        throw new Error("Please fill in all required fields and select at least one status");
-      }
-      const changes = changesText.split("\n").filter(c => c.trim());
-      await apiRequest("POST", "/api/changelogs", {
-        version,
-        title,
-        description,
-        status: JSON.stringify(statuses),
-        changes: JSON.stringify(changes),
-        date,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/changelogs"] });
-      setVersion("");
-      setTitle("");
-      setDescription("");
-      setChangesText("");
-      setStatuses([]);
-      setShowForm(false);
-    },
   });
 
   const deleteMutation = useMutation({
@@ -127,134 +81,13 @@ export default function Changelogs() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-12">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-4xl md:text-5xl font-black" data-testid="text-page-title">
-            Changelogs
-          </h1>
-          {isAuthenticated && (
-            <Button
-              onClick={() => setShowForm(!showForm)}
-              className="gap-2"
-              data-testid="button-add-changelog"
-            >
-              <Plus className="w-4 h-4" />
-              Add Changelog
-            </Button>
-          )}
-        </div>
+        <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
+          Changelogs
+        </h1>
         <p className="text-muted-foreground text-lg">
           Track all updates, improvements, and fixes to the BFFL platform
         </p>
       </div>
-
-      {isAuthenticated && showForm && (
-        <Card className="p-6 mb-8">
-          <h2 className="text-xl font-bold mb-6">Create New Changelog</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="version">Version (auto-generated) *</Label>
-                <Input
-                  id="version"
-                  value={version}
-                  disabled
-                  className="bg-muted cursor-not-allowed"
-                  data-testid="input-version"
-                />
-                <p className="text-xs text-muted-foreground mt-1">Next version: {version}</p>
-              </div>
-              <div className="md:col-span-2">
-                <Label>Statuses (select all that apply) *</Label>
-                <div className="space-y-2 mt-2">
-                  {[
-                    { value: "NEW", label: "NEW - New feature or functionality" },
-                    { value: "IMPROVED", label: "IMPROVED - Enhancement to existing feature" },
-                    { value: "FIXED", label: "FIXED - Bug fix or issue resolution" },
-                    { value: "DESIGN", label: "DESIGN - Visual or UI changes" },
-                  ].map((option) => (
-                    <div key={option.value} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id={`status-${option.value}`}
-                        checked={statuses.includes(option.value as any)}
-                        onChange={() => toggleStatus(option.value as any)}
-                        className="rounded border border-input"
-                        data-testid={`checkbox-status-${option.value.toLowerCase()}`}
-                      />
-                      <Label htmlFor={`status-${option.value}`} className="cursor-pointer font-normal">
-                        {option.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="Feature name or update title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  data-testid="input-title"
-                />
-              </div>
-              <div>
-                <Label htmlFor="date">Date *</Label>
-                <Input
-                  id="date"
-                  type="text"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  data-testid="input-date"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                placeholder="Brief description of this release"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                data-testid="input-description"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="changes">Changes (one per line) *</Label>
-              <Textarea
-                id="changes"
-                placeholder="Added new feature&#10;Fixed bug&#10;Improved performance"
-                value={changesText}
-                onChange={(e) => setChangesText(e.target.value)}
-                className="h-32"
-                data-testid="textarea-changes"
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={() => createMutation.mutate()}
-                disabled={createMutation.isPending}
-                data-testid="button-create-changelog"
-              >
-                Create Changelog
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowForm(false)}
-                data-testid="button-cancel"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
 
       <div className="space-y-8">
         {isLoading ? (
