@@ -17,6 +17,8 @@ import News from "@/pages/News";
 import NewsDetail from "@/pages/NewsDetail";
 import Pickems from "@/pages/Pickems";
 import AdminDashboard from "@/pages/AdminDashboard";
+import SocialLinks from "@/pages/SocialLinks";
+import Changelogs from "@/pages/Changelogs";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
 
@@ -43,6 +45,8 @@ function Router() {
         <Route path="/news" component={News} />
         <Route path="/news/:id" component={NewsDetail} />
         <Route path="/pickems" component={Pickems} />
+        <Route path="/social" component={SocialLinks} />
+        <Route path="/changelogs" component={Changelogs} />
         {isAuthenticated && <Route path="/admin" component={AdminDashboard} />}
         <Route component={NotFound} />
       </Switch>
