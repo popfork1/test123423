@@ -247,7 +247,7 @@ export default function GameDetail() {
               </div>
             )}
 
-            {!game.isFinal && !isScheduled && (
+            {!game.isFinal && (isScheduled || game.isLive) && (
               <div className="pt-4 border-t">
                 <p className="font-semibold mb-4">Make a Prediction</p>
                 <div className="grid grid-cols-2 gap-3">
