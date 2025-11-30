@@ -22,6 +22,12 @@ interface StandingsEntry {
   manualOrder?: number;
 }
 
+interface DropZone {
+  divisionId: string;
+  position: 'above' | 'below';
+  targetId: string;
+}
+
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
 const DIVISIONS = ["D1", "D2", "D3", "D4"] as const;
@@ -34,6 +40,7 @@ export default function Standings() {
   const [newDivision, setNewDivision] = useState<"D1" | "D2" | "D3" | "D4">("D1");
   const [editingPD, setEditingPD] = useState<Record<string, string>>({});
   const [draggedTeam, setDraggedTeam] = useState<string | null>(null);
+  const [dropZone, setDropZone] = useState<DropZone | null>(null);
 
   const { data: dbStandings, isLoading } = useQuery({
     queryKey: ["/api/standings"],
@@ -141,9 +148,31 @@ export default function Standings() {
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, targetTeamId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    
+    if (!draggedTeam || draggedTeam === targetTeamId) return;
+    
+    const draggedEntry = standings.find(s => s.id === draggedTeam);
+    const targetEntry = standings.find(s => s.id === targetTeamId);
+    
+    if (!draggedEntry || !targetEntry || draggedEntry.division !== targetEntry.division) return;
+    
+    // Determine drop position based on mouse Y position
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    const position = e.clientY < midpoint ? 'above' : 'below';
+    
+    setDropZone({
+      divisionId: targetEntry.division,
+      position,
+      targetId: targetTeamId,
+    });
+  };
+
+  const handleDragLeave = () => {
+    setDropZone(null);
   };
 
   const handleDrop = (e: React.DragEvent, targetTeamId: string) => {
@@ -155,32 +184,54 @@ export default function Standings() {
     
     if (!draggedEntry || !targetEntry || draggedEntry.division !== targetEntry.division) {
       setDraggedTeam(null);
+      setDropZone(null);
       return;
     }
 
-    // Swap the manualOrder values between dragged and target teams
+    // Get all items in this division, sorted by order
+    const divisionItems = getDivisionStandings(draggedEntry.division);
+    
+    // Remove dragged item from its position
+    const filteredItems = divisionItems.filter(item => item.id !== draggedTeam);
+    
+    // Find target index
+    const targetIndex = filteredItems.findIndex(item => item.id === targetTeamId);
+    
+    // Determine insertion index based on drop position
+    let insertIndex = targetIndex;
+    if (dropZone?.position === 'below') {
+      insertIndex = targetIndex + 1;
+    }
+    
+    // Insert dragged item at new position
+    filteredItems.splice(insertIndex, 0, draggedEntry);
+    
+    // Renumber all items with clean sequential order
+    const reorderedItems = filteredItems.map((item, idx) => ({
+      ...item,
+      manualOrder: idx,
+    }));
+    
+    // Update all standings - keep other divisions unchanged
     const newStandings = standings.map(entry => {
-      if (entry.id === draggedTeam) {
-        return { ...entry, manualOrder: targetEntry.manualOrder };
-      } else if (entry.id === targetTeamId) {
-        return { ...entry, manualOrder: draggedEntry.manualOrder };
-      }
-      return entry;
+      const reordered = reorderedItems.find(r => r.id === entry.id);
+      return reordered || entry;
     });
 
     setStandings(newStandings);
     
-    // Save both swapped entries to backend immediately
-    const newDraggedEntry = newStandings.find(e => e.id === draggedTeam);
-    const newTargetEntry = newStandings.find(e => e.id === targetTeamId);
-    if (newDraggedEntry) upsertMutation.mutate(newDraggedEntry);
-    if (newTargetEntry) upsertMutation.mutate(newTargetEntry);
+    // Save all affected entries
+    reorderedItems.forEach(item => {
+      upsertMutation.mutate(item);
+    });
     
     setDraggedTeam(null);
+    setDropZone(null);
   };
 
   const handleDragEnd = () => {
     setDraggedTeam(null);
+    setDropZone(null);
   };
 
   const getUsedTeams = standings.map(s => s.team);
@@ -271,10 +322,24 @@ export default function Standings() {
                           <tr 
                             key={entry.id} 
                             data-testid={`row-team-${entry.id}`}
-                            onDragOver={handleDragOver}
+                            onDragOver={(e) => handleDragOver(e, entry.id)}
+                            onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, entry.id)}
-                            className={`transition-all ${draggedTeam === entry.id ? 'opacity-50 bg-muted' : draggedTeam && draggedTeam !== entry.id ? 'hover:bg-accent/50' : ''}`}
+                            className={`transition-all relative ${
+                              draggedTeam === entry.id ? 'opacity-50 bg-muted' : ''
+                            } ${
+                              draggedTeam && draggedTeam !== entry.id ? 'hover:bg-accent/30' : ''
+                            } ${
+                              dropZone?.targetId === entry.id ? 'bg-accent/20' : ''
+                            }`}
                           >
+                            {dropZone?.targetId === entry.id && (
+                              <div 
+                                className={`absolute left-0 right-0 h-0.5 bg-primary pointer-events-none ${
+                                  dropZone.position === 'above' ? 'top-0' : 'bottom-0'
+                                }`}
+                              />
+                            )}
                             <td className="px-2 py-4 text-center">
                               {isAuthenticated && (
                                 <div 
