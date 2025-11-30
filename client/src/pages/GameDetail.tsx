@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChatComponent } from "@/components/ChatComponent";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Game, ChatMessage, Prediction } from "@shared/schema";
+import type { Game, ChatMessage, Prediction, Standings } from "@shared/schema";
 import { formatInTimeZone } from "date-fns-tz";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
@@ -38,6 +38,10 @@ export default function GameDetail() {
   const { data: predictions, refetch: refetchPredictions } = useQuery<Prediction[]>({
     queryKey: ["/api/predictions", gameId],
     enabled: !!gameId,
+  });
+
+  const { data: standings } = useQuery<Standings[]>({
+    queryKey: ["/api/standings"],
   });
 
   const voteMutation = useMutation({
@@ -265,10 +269,17 @@ export default function GameDetail() {
                 <p className="font-semibold mb-4">Win Probability & Predictions</p>
                 
                 {(() => {
-                  const team1Votes = predictions?.filter(p => p.votedFor === game.team1).length || 0;
-                  const team2Votes = predictions?.filter(p => p.votedFor === game.team2).length || 0;
-                  const totalVotes = team1Votes + team2Votes;
-                  const team1Percent = totalVotes > 0 ? Math.round((team1Votes / totalVotes) * 100) : 50;
+                  // Get PD values from standings
+                  const team1Standing = standings?.find(s => s.team === game.team1);
+                  const team2Standing = standings?.find(s => s.team === game.team2);
+                  
+                  const team1PD = team1Standing?.pointDifferential || 0;
+                  const team2PD = team2Standing?.pointDifferential || 0;
+                  
+                  // Calculate win probability based on PD difference
+                  // Each 10 points of PD difference = ~5% win probability swing
+                  const pdDifference = team1PD - team2PD;
+                  const team1Percent = Math.max(15, Math.min(85, Math.round(50 + (pdDifference / 20))));
                   const team2Percent = 100 - team1Percent;
                   
                   return (
@@ -285,6 +296,7 @@ export default function GameDetail() {
                             data-testid={`winprob-bar-${game.team1}`}
                           />
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">{team1Standing?.wins || 0}-{team1Standing?.losses || 0} (PD: {team1PD > 0 ? '+' : ''}{team1PD})</p>
                       </div>
                       
                       <div>
@@ -299,10 +311,11 @@ export default function GameDetail() {
                             data-testid={`winprob-bar-${game.team2}`}
                           />
                         </div>
+                        <p className="text-xs text-muted-foreground mt-1">{team2Standing?.wins || 0}-{team2Standing?.losses || 0} (PD: {team2PD > 0 ? '+' : ''}{team2PD})</p>
                       </div>
                       
-                      <p className="text-xs text-muted-foreground text-center mt-2">
-                        {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'} • Cast your vote below
+                      <p className="text-xs text-muted-foreground text-center mt-3 pt-2 border-t">
+                        Based on Point Differential rankings
                       </p>
                     </div>
                   );
