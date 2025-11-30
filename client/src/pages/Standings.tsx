@@ -256,19 +256,11 @@ export default function Standings() {
                             <td className="px-6 py-4 text-sm">
                               {isAuthenticated ? (
                                 <Input
-                                  type="text"
-                                  inputMode="numeric"
+                                  type="number"
                                   value={entry.pointDifferential || 0}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    // Only update if it's a valid complete number (including negative)
-                                    if (val === '') {
-                                      updateEntry(entry.id, "pointDifferential", 0);
-                                    } else if (/^-?\d+$/.test(val)) {
-                                      updateEntry(entry.id, "pointDifferential", parseInt(val));
-                                    }
-                                    // Allow typing intermediate states like "-" but don't process them
-                                  }}
+                                  onChange={(e) =>
+                                    updateEntry(entry.id, "pointDifferential", parseInt(e.target.value) || 0)
+                                  }
                                   className="w-16 text-center"
                                   data-testid={`input-pd-${entry.id}`}
                                 />
