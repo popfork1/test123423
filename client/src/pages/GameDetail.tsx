@@ -262,7 +262,52 @@ export default function GameDetail() {
 
             {!game.isFinal && (isScheduled || game.isLive) && (
               <div className="pt-4 border-t">
-                <p className="font-semibold mb-4">Make a Prediction</p>
+                <p className="font-semibold mb-4">Win Probability & Predictions</p>
+                
+                {(() => {
+                  const team1Votes = predictions?.filter(p => p.votedFor === game.team1).length || 0;
+                  const team2Votes = predictions?.filter(p => p.votedFor === game.team2).length || 0;
+                  const totalVotes = team1Votes + team2Votes;
+                  const team1Percent = totalVotes > 0 ? Math.round((team1Votes / totalVotes) * 100) : 50;
+                  const team2Percent = 100 - team1Percent;
+                  
+                  return (
+                    <div className="mb-6 space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-semibold">{game.team1}</span>
+                          <span className="text-lg font-bold text-primary">{team1Percent}%</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                          <div 
+                            className="bg-primary h-full transition-all duration-300"
+                            style={{ width: `${team1Percent}%` }}
+                            data-testid={`winprob-bar-${game.team1}`}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-semibold">{game.team2}</span>
+                          <span className="text-lg font-bold text-primary">{team2Percent}%</span>
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                          <div 
+                            className="bg-primary h-full transition-all duration-300"
+                            style={{ width: `${team2Percent}%` }}
+                            data-testid={`winprob-bar-${game.team2}`}
+                          />
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground text-center mt-2">
+                        {totalVotes} {totalVotes === 1 ? 'vote' : 'votes'} • Cast your vote below
+                      </p>
+                    </div>
+                  );
+                })()}
+                
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     variant="outline"
