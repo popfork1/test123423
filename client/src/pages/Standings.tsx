@@ -17,7 +17,7 @@ interface StandingsEntry {
   team: string;
   wins: number;
   losses: number;
-  ties?: number;
+  pointDifferential?: number;
   division: "D1" | "D2" | "D3" | "D4";
 }
 
@@ -45,7 +45,7 @@ export default function Standings() {
           team: s.team,
           wins: s.wins,
           losses: s.losses,
-          ties: s.ties,
+          pointDifferential: s.pointDifferential,
           division: s.division,
         }))
       );
@@ -59,7 +59,7 @@ export default function Standings() {
         division: entry.division,
         wins: entry.wins,
         losses: entry.losses,
-        ties: entry.ties,
+        pointDifferential: entry.pointDifferential,
       });
     },
     onSuccess: () => {
@@ -90,7 +90,7 @@ export default function Standings() {
       team: newTeam,
       wins: 0,
       losses: 0,
-      ties: 0,
+      pointDifferential: 0,
       division: newDivision,
     };
     setStandings([...standings, newEntry]);
@@ -205,7 +205,7 @@ export default function Standings() {
                           <th className="px-6 py-3 text-left text-sm font-semibold">Team</th>
                           <th className="px-6 py-3 text-center text-sm font-semibold">Wins</th>
                           <th className="px-6 py-3 text-center text-sm font-semibold">Losses</th>
-                          <th className="px-6 py-3 text-center text-sm font-semibold">Ties</th>
+                          <th className="px-6 py-3 text-center text-sm font-semibold">PD</th>
                           {isAuthenticated && <th className="px-6 py-3 text-center text-sm font-semibold">Actions</th>}
                         </tr>
                       </thead>
@@ -257,16 +257,15 @@ export default function Standings() {
                               {isAuthenticated ? (
                                 <Input
                                   type="number"
-                                  min="0"
-                                  value={entry.ties || 0}
+                                  value={entry.pointDifferential || 0}
                                   onChange={(e) =>
-                                    updateEntry(entry.id, "ties", parseInt(e.target.value) || 0)
+                                    updateEntry(entry.id, "pointDifferential", parseInt(e.target.value) || 0)
                                   }
                                   className="w-16 text-center"
-                                  data-testid={`input-ties-${entry.id}`}
+                                  data-testid={`input-pd-${entry.id}`}
                                 />
                               ) : (
-                                <div className="text-center">{entry.ties || 0}</div>
+                                <div className="text-center">{entry.pointDifferential || 0}</div>
                               )}
                             </td>
                             {isAuthenticated && (

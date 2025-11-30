@@ -142,7 +142,7 @@ export const standings = pgTable("standings", {
   division: varchar("division", { length: 10 }).notNull(),
   wins: integer("wins").default(0),
   losses: integer("losses").default(0),
-  ties: integer("ties").default(0),
+  pointDifferential: integer("point_differential").default(0),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
