@@ -174,6 +174,49 @@ export default async function runApp(
         )
       `);
       
+      // Migrate standings table: rename ties to point_differential if needed
+      try {
+        const columnCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'standings' AND column_name = 'ties'
+          )
+        `);
+        
+        if (columnCheck.rows && columnCheck.rows[0]?.exists) {
+          // Rename ties to point_differential
+          await db.execute(sql`
+            ALTER TABLE standings RENAME COLUMN ties TO point_differential
+          `);
+          console.log('Migrated standings table: ties → point_differential');
+        }
+      } catch (err: any) {
+        if (!err.message?.includes('already exists') && !err.message?.includes('does not exist')) {
+          console.warn('Migration check warning:', err.message);
+        }
+      }
+      
+      // Add manual_order column if it doesn't exist
+      try {
+        const manualOrderCheck = await db.execute(sql`
+          SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns 
+            WHERE table_name = 'standings' AND column_name = 'manual_order'
+          )
+        `);
+        
+        if (!manualOrderCheck.rows || !manualOrderCheck.rows[0]?.exists) {
+          await db.execute(sql`
+            ALTER TABLE standings ADD COLUMN manual_order INTEGER
+          `);
+          console.log('Added manual_order column to standings table');
+        }
+      } catch (err: any) {
+        if (!err.message?.includes('already exists') && !err.message?.includes('does not exist')) {
+          console.warn('Column addition warning:', err.message);
+        }
+      }
+      
       // Create playoff_matches table
       await db.execute(sql`
         CREATE TABLE IF NOT EXISTS playoff_matches (
