@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
-import { Header } from "@/components/Header";
+import { Sidebar, SidebarProvider, useSidebar } from "@/components/Sidebar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Landing from "@/pages/Landing";
 import LiveScores from "@/pages/LiveScores";
@@ -25,13 +25,13 @@ import { useMemo } from "react";
 
 function ChristmasDecorations() {
   const snowflakes = useMemo(() => {
-    return Array.from({ length: 30 }).map((_, i) => ({
+    return Array.from({ length: 25 }).map((_, i) => ({
       id: i,
       left: Math.random() * 100,
-      size: Math.random() * 12 + 8,
-      duration: Math.random() * 15 + 10,
-      delay: Math.random() * 10,
-      opacity: Math.random() * 0.4 + 0.3,
+      size: Math.random() * 10 + 8,
+      duration: Math.random() * 20 + 15,
+      delay: Math.random() * 15,
+      opacity: Math.random() * 0.3 + 0.2,
     }));
   }, []);
 
@@ -56,8 +56,9 @@ function ChristmasDecorations() {
   );
 }
 
-function Router() {
+function MainContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { collapsed } = useSidebar();
 
   if (isLoading) {
     return (
@@ -71,27 +72,31 @@ function Router() {
   }
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background">
       <ChristmasDecorations />
-      <Header />
+      <Sidebar />
       
-      <Switch>
-        <Route path="/" component={Landing} />
-        <Route path="/login" component={Login} />
-        <Route path="/scores" component={LiveScores} />
-        <Route path="/game/:id" component={GameDetail} />
-        <Route path="/previous-weeks" component={PreviousWeeks} />
-        <Route path="/schedule" component={Schedule} />
-        <Route path="/playoffs" component={Playoffs} />
-        <Route path="/standings" component={Standings} />
-        <Route path="/news" component={News} />
-        <Route path="/news/:id" component={NewsDetail} />
-        <Route path="/pickems" component={Pickems} />
-        <Route path="/social" component={SocialLinks} />
-        <Route path="/changelogs" component={Changelogs} />
-        {isAuthenticated && <Route path="/admin" component={AdminDashboard} />}
-        <Route component={NotFound} />
-      </Switch>
+      <main className={`min-h-screen pb-20 md:pb-0 transition-all duration-300 ${
+        collapsed ? 'md:ml-20' : 'md:ml-64'
+      }`}>
+        <Switch>
+          <Route path="/" component={Landing} />
+          <Route path="/login" component={Login} />
+          <Route path="/scores" component={LiveScores} />
+          <Route path="/game/:id" component={GameDetail} />
+          <Route path="/previous-weeks" component={PreviousWeeks} />
+          <Route path="/schedule" component={Schedule} />
+          <Route path="/playoffs" component={Playoffs} />
+          <Route path="/standings" component={Standings} />
+          <Route path="/news" component={News} />
+          <Route path="/news/:id" component={NewsDetail} />
+          <Route path="/pickems" component={Pickems} />
+          <Route path="/social" component={SocialLinks} />
+          <Route path="/changelogs" component={Changelogs} />
+          {isAuthenticated && <Route path="/admin" component={AdminDashboard} />}
+          <Route component={NotFound} />
+        </Switch>
+      </main>
     </div>
   );
 }
@@ -100,10 +105,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <SidebarProvider>
+          <TooltipProvider>
+            <Toaster />
+            <MainContent />
+          </TooltipProvider>
+        </SidebarProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

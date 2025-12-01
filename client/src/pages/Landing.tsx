@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GameCard } from "@/components/GameCard";
 import type { Game, News as NewsType } from "@shared/schema";
 import { useLocation, Link } from "wouter";
-import { ArrowRight, Calendar, MessageSquare, Trophy, Newspaper, Target, Sparkles, TreePine, Star, Gift } from "lucide-react";
+import { ArrowRight, Trophy, Newspaper, Zap, Calendar, BarChart3, Target, Sparkles, Gift, Star, Snowflake } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Landing() {
@@ -21,101 +21,121 @@ export default function Landing() {
   });
 
   const currentWeek = games && games.length > 0 ? games[0].week : 1;
-  const featuredNews = news?.slice(0, 3) || [];
+  const featuredNews = news?.slice(0, 2) || [];
+  const liveGames = games?.filter(g => g.isLive) || [];
+  const upcomingGames = games?.filter(g => !g.isLive && !g.isFinal)?.slice(0, 3) || [];
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
-        
-        <div className="absolute top-20 left-10 opacity-20 animate-pulse">
-          <TreePine className="w-24 h-24 text-secondary" />
-        </div>
-        <div className="absolute top-32 right-16 opacity-20 animate-pulse" style={{ animationDelay: '1s' }}>
-          <TreePine className="w-16 h-16 text-secondary" />
-        </div>
-        
-        <div className="max-w-6xl mx-auto px-4 pt-12 pb-20 md:pt-20 md:pb-28">
-          <div className="text-center mb-16 relative">
-            <div className="inline-flex items-center gap-2 mb-6">
-              <Badge className="px-4 py-2 text-sm font-semibold bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
-                <Sparkles className="w-4 h-4 mr-2" />
-                BFFL Season 1
-              </Badge>
-            </div>
-            
-            <div className="relative inline-block mb-6">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight" data-testid="text-hero-title">
-                <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                  BFFL
-                </span>
-                <span className="text-foreground"> Fan Hub</span>
-              </h1>
-              <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6">
-                <Star className="w-8 h-8 md:w-12 md:h-12 text-accent animate-pulse" fill="currentColor" />
-              </div>
-            </div>
-            
-            <p className="text-lg text-primary font-semibold mb-2 tracking-wide">
-              FFN Network
-            </p>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-              Your ultimate destination for live scores, real-time discussion, and everything BFFL this holiday season
-            </p>
-            
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button 
-                size="lg" 
-                onClick={() => setLocation("/scores")} 
-                className="gap-2 shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:scale-105 transition-all text-base px-8 py-6"
-                data-testid="button-view-scores"
-              >
-                <Trophy className="w-5 h-5" />
-                Live Scores
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                onClick={() => setLocation("/schedule")} 
-                className="border-2 hover:bg-secondary/10 hover:border-secondary hover:scale-105 transition-all text-base px-8 py-6"
-                data-testid="button-view-schedule"
-              >
-                <Calendar className="w-5 h-5 mr-2" />
-                View Schedule
-              </Button>
-            </div>
+    <div className="min-h-screen p-4 md:p-6 lg:p-8">
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-3xl">🎄</span>
+            <Gift className="w-6 h-6 text-primary animate-bounce" style={{ animationDuration: '2s' }} />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black">Welcome to BFFL Fan Hub</h1>
+            <p className="text-muted-foreground text-sm">Your festive destination for all things BFFL</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 -mt-8">
-        <div className="mb-20">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-                <Trophy className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-black" data-testid="text-this-week">
-                  Week {currentWeek} Games
-                </h2>
-                <p className="text-muted-foreground text-sm">Follow all the action this week</p>
-              </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+        <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
+          <div className="absolute top-4 right-4 flex gap-2">
+            <Snowflake className="w-8 h-8 text-primary/20 animate-pulse" />
+            <Star className="w-6 h-6 text-accent/30 animate-pulse" style={{ animationDelay: '0.5s' }} fill="currentColor" />
+          </div>
+          
+          <div className="relative z-10">
+            <Badge className="mb-4 bg-primary/20 text-primary border-primary/30">
+              <Sparkles className="w-3 h-3 mr-1" />
+              Season 1 Highlights
+            </Badge>
+            
+            <h2 className="text-3xl md:text-4xl font-black mb-4 leading-tight">
+              Week {currentWeek} is <span className="text-primary">Here!</span>
+            </h2>
+            
+            <p className="text-muted-foreground mb-6 max-w-lg">
+              Catch all the action with live scores, real-time chat, and complete coverage of every matchup this week.
+            </p>
+            
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={() => setLocation("/scores")} className="gap-2 shadow-lg shadow-primary/20">
+                <Zap className="w-4 h-4" />
+                View Live Scores
+              </Button>
+              <Button variant="outline" onClick={() => setLocation("/schedule")} className="gap-2">
+                <Calendar className="w-4 h-4" />
+                Full Schedule
+              </Button>
             </div>
-            <Button variant="ghost" onClick={() => setLocation("/scores")} className="gap-2 hover:bg-primary/10">
-              View All <ArrowRight className="w-4 h-4" />
+          </div>
+          
+          <div className="absolute -bottom-8 -right-8 text-[150px] opacity-5 select-none">
+            🏈
+          </div>
+        </Card>
+
+        <Card className="p-5 border-2 border-accent/20 bg-gradient-to-b from-accent/5 to-background">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-accent" />
+              Quick Stats
+            </h3>
+            <span className="text-2xl">🎅</span>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <span className="text-sm text-muted-foreground">Current Week</span>
+              <span className="font-bold text-lg">{currentWeek}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+              <span className="text-sm text-muted-foreground">Games This Week</span>
+              <span className="font-bold text-lg">{games?.length || 0}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10">
+              <span className="text-sm text-muted-foreground">Live Now</span>
+              <span className="font-bold text-lg text-primary">{liveGames.length}</span>
+            </div>
+          </div>
+          
+          <Button 
+            variant="ghost" 
+            className="w-full mt-4 text-accent hover:bg-accent/10"
+            onClick={() => setLocation("/standings")}
+          >
+            <BarChart3 className="w-4 h-4 mr-2" />
+            View Standings
+          </Button>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Zap className="w-4 h-4 text-primary" />
+              </div>
+              This Week's Games
+            </h2>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/scores")} className="text-primary">
+              See All <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
-
+          
           {gamesLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-64 rounded-2xl" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-xl" />
               ))}
             </div>
           ) : games && games.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {games.map((game) => (
+            <div className="space-y-4">
+              {games.slice(0, 4).map((game) => (
                 <GameCard
                   key={game.id}
                   game={game}
@@ -124,193 +144,122 @@ export default function Landing() {
               ))}
             </div>
           ) : (
-            <Card className="p-12 text-center rounded-2xl border-dashed border-2">
-              <div className="text-4xl mb-4">🎄</div>
-              <p className="text-muted-foreground text-lg">No games scheduled yet</p>
-              <p className="text-sm text-muted-foreground mt-2">Check back soon for upcoming matchups!</p>
+            <Card className="p-8 text-center border-dashed border-2">
+              <div className="text-4xl mb-3">🎄</div>
+              <p className="text-muted-foreground">No games scheduled yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Check back soon!</p>
             </Card>
           )}
         </div>
 
-        <div className="mb-20">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center shadow-lg shadow-accent/20">
-                <Newspaper className="w-6 h-6 text-accent-foreground" />
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
+                <Newspaper className="w-4 h-4 text-secondary" />
               </div>
-              <div>
-                <h2 className="text-2xl md:text-3xl font-black" data-testid="text-latest-news">
-                  Latest News
-                </h2>
-                <p className="text-muted-foreground text-sm">Stay updated with the newest announcements</p>
-              </div>
-            </div>
-            <Button variant="ghost" onClick={() => setLocation("/news")} className="gap-2 hover:bg-accent/10">
-              View All <ArrowRight className="w-4 h-4" />
+              Latest News
+            </h2>
+            <Button variant="ghost" size="sm" onClick={() => setLocation("/news")} className="text-secondary">
+              See All <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
-
+          
           {newsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-2xl" />
+            <div className="space-y-4">
+              {[...Array(2)].map((_, i) => (
+                <Skeleton key={i} className="h-40 rounded-xl" />
               ))}
             </div>
           ) : featuredNews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-4">
               {featuredNews.map((post, index) => (
                 <Link key={post.id} href={`/news/${post.id}`}>
-                  <Card 
-                    className="group p-6 flex flex-col cursor-pointer h-full rounded-2xl border-2 border-transparent hover:border-accent/30 hover:shadow-xl hover:shadow-accent/10 transition-all duration-300 hover:-translate-y-1" 
-                    data-testid={`news-card-${post.id}`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-lg">{index === 0 ? '🎄' : index === 1 ? '🎁' : '⭐'}</span>
-                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide" data-testid={`news-date-${post.id}`}>
+                  <Card className="p-5 cursor-pointer hover:border-secondary/30 hover:shadow-lg transition-all group">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">{index === 0 ? '🎄' : '🎁'}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground mb-1">
                           {format(new Date(post.createdAt!), "MMM d, yyyy")}
                         </p>
-                      </div>
-                      <h3 className="text-lg font-bold mb-3 line-clamp-2 group-hover:text-primary transition-colors" data-testid={`news-title-${post.id}`}>
-                        {post.title}
-                      </h3>
-                      {post.excerpt && (
-                        <p className="text-muted-foreground text-sm mb-4 line-clamp-3 flex-1" data-testid={`news-excerpt-${post.id}`}>
-                          {post.excerpt}
+                        <h3 className="font-bold mb-2 line-clamp-2 group-hover:text-secondary transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {post.excerpt || post.content}
                         </p>
-                      )}
-                      <div className="prose prose-sm max-w-none line-clamp-3 text-muted-foreground text-sm" data-testid={`news-content-${post.id}`}>
-                        {post.content}
                       </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t border-border/50">
-                      <span className="text-sm text-primary font-medium group-hover:underline inline-flex items-center gap-1">
-                        Read more <ArrowRight className="w-3 h-3" />
-                      </span>
                     </div>
                   </Card>
                 </Link>
               ))}
             </div>
           ) : (
-            <Card className="p-12 text-center rounded-2xl border-dashed border-2">
-              <div className="text-4xl mb-4">📰</div>
-              <p className="text-muted-foreground text-lg">No news yet</p>
-              <p className="text-sm text-muted-foreground mt-2">Stay tuned for updates!</p>
+            <Card className="p-8 text-center border-dashed border-2">
+              <div className="text-4xl mb-3">📰</div>
+              <p className="text-muted-foreground">No news yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Stay tuned for updates!</p>
             </Card>
           )}
         </div>
+      </div>
 
-        <div className="mb-20">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <Gift className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl md:text-3xl font-black">Everything You Need</h2>
-              <Gift className="w-6 h-6 text-primary" />
-            </div>
-            <p className="text-muted-foreground">All your BFFL essentials in one festive place</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="group p-6 rounded-2xl border-2 border-transparent hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 cursor-pointer" onClick={() => setLocation("/scores")}>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <Trophy className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Live Scores</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                Follow every game with real-time score updates and live status indicators
-              </p>
-              <span className="text-primary text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                View <ArrowRight className="w-4 h-4" />
-              </span>
-            </Card>
-
-            <Card className="group p-6 rounded-2xl border-2 border-transparent hover:border-secondary/20 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300 cursor-pointer" onClick={() => games?.length ? setLocation(`/game/${games[0].id}`) : null}>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <MessageSquare className="w-7 h-7 text-secondary" />
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-secondary transition-colors">Live Chat</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                Join the conversation with fans in real-time during every game
-              </p>
-              <span className="text-secondary text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                Chat <ArrowRight className="w-4 h-4" />
-              </span>
-            </Card>
-
-            <Card className="group p-6 rounded-2xl border-2 border-transparent hover:border-accent/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 cursor-pointer" onClick={() => setLocation("/schedule")}>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <Calendar className="w-7 h-7 text-accent" />
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-accent transition-colors">Full Schedule</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                Never miss a game with our complete season schedule and results
-              </p>
-              <span className="text-accent text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                Schedule <ArrowRight className="w-4 h-4" />
-              </span>
-            </Card>
-
-            <Card className="group p-6 rounded-2xl border-2 border-transparent hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 cursor-pointer" onClick={() => setLocation("/news")}>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <Newspaper className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">Latest News</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                Stay updated with breaking news and important announcements
-              </p>
-              <span className="text-primary text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                News <ArrowRight className="w-4 h-4" />
-              </span>
-            </Card>
-
-            <Card className="group p-6 rounded-2xl border-2 border-transparent hover:border-secondary/20 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300 cursor-pointer" onClick={() => setLocation("/pickems")}>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <Target className="w-7 h-7 text-secondary" />
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-secondary transition-colors">Weekly Pick'ems</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                Test your predictions with our weekly pick'em challenges
-              </p>
-              <span className="text-secondary text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                Pick'ems <ArrowRight className="w-4 h-4" />
-              </span>
-            </Card>
-
-            <Card className="group p-6 rounded-2xl border-2 border-transparent hover:border-accent/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300 cursor-pointer" onClick={() => setLocation("/previous-weeks")}>
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                <Trophy className="w-7 h-7 text-accent" />
-              </div>
-              <h3 className="text-xl font-bold mb-2 group-hover:text-accent transition-colors">Game Archives</h3>
-              <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
-                Browse complete results from all previous weeks of the season
-              </p>
-              <span className="text-accent text-sm font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
-                Archives <ArrowRight className="w-4 h-4" />
-              </span>
-            </Card>
-          </div>
+      <div className="mb-8">
+        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Gift className="w-5 h-5 text-primary" />
+          Quick Access
+        </h2>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[
+            { icon: Zap, label: "Live Scores", path: "/scores", color: "primary" },
+            { icon: Calendar, label: "Schedule", path: "/schedule", color: "secondary" },
+            { icon: Trophy, label: "Playoffs", path: "/playoffs", color: "accent" },
+            { icon: BarChart3, label: "Standings", path: "/standings", color: "primary" },
+            { icon: Target, label: "Pick'ems", path: "/pickems", color: "secondary" },
+            { icon: Newspaper, label: "News", path: "/news", color: "accent" },
+          ].map((item, index) => {
+            const Icon = item.icon;
+            const colorClass = item.color === 'primary' ? 'bg-primary/10 text-primary hover:bg-primary/20' :
+                              item.color === 'secondary' ? 'bg-secondary/10 text-secondary hover:bg-secondary/20' :
+                              'bg-accent/10 text-accent hover:bg-accent/20';
+            return (
+              <Card 
+                key={item.path}
+                className={`p-4 cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${colorClass}`}
+                onClick={() => setLocation(item.path)}
+              >
+                <div className="flex flex-col items-center text-center gap-2">
+                  <Icon className="w-6 h-6" />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </div>
+              </Card>
+            );
+          })}
         </div>
+      </div>
 
-        <div className="text-center py-16 border-t border-border/50">
-          <div className="inline-block mb-6">
-            <div className="flex items-center justify-center gap-4 text-4xl">
+      <Card className="p-6 bg-gradient-to-r from-secondary/10 via-background to-primary/10 border-2 border-secondary/20">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-4xl">
               <span>🎄</span>
               <span>🎅</span>
               <span>🎁</span>
             </div>
+            <div>
+              <h3 className="font-bold text-lg">Happy Holidays from BFFL!</h3>
+              <p className="text-muted-foreground text-sm">Enjoy the season and may the best team win!</p>
+            </div>
           </div>
-          <p className="text-lg text-muted-foreground mb-6 max-w-md mx-auto">
-            Ready to manage your BFFL content? Log in as admin to post games, news, and more.
-          </p>
           <a href="/login">
-            <Button size="lg" className="gap-2 shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:scale-105 transition-all" data-testid="button-admin-login">
+            <Button variant="outline" className="gap-2 border-secondary/30 hover:bg-secondary/10">
               <span>🎅</span>
               Admin Login
             </Button>
           </a>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
