@@ -84,9 +84,7 @@ export function Sidebar() {
               </div>
               {!collapsed && (
                 <div>
-                  <h1 className="text-xl font-black tracking-tight group-hover:text-accent transition-colors">
-                    BFFL
-                  </h1>
+                  <h1 className="text-xl font-black tracking-tight group-hover:text-accent transition-colors">URFL</h1>
                   <p className="text-xs text-white/60 font-medium">Fan Hub</p>
                 </div>
               )}
@@ -209,7 +207,6 @@ export function Sidebar() {
 
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-primary/20 to-transparent pointer-events-none" />
       </aside>
-
       <MobileNav navItems={navItems} isAuthenticated={isAuthenticated} />
     </>
   );
