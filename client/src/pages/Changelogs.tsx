@@ -84,11 +84,8 @@ export default function Changelogs() {
         <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
           Changelogs
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Track all updates, improvements, and fixes to the BFFL platform
-        </p>
+        <p className="text-muted-foreground text-lg">Track all updates, improvements, and fixes to the URFL platform</p>
       </div>
-
       <div className="space-y-8">
         {isLoading ? (
           <Card className="p-6"><div className="text-muted-foreground">Loading changelogs...</div></Card>
