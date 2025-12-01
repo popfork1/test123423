@@ -34,12 +34,11 @@ export default function Landing() {
             <Gift className="w-6 h-6 text-primary animate-bounce" style={{ animationDuration: '2s' }} />
           </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black">Welcome to BFFL Fan Hub</h1>
+            <h1 className="text-2xl md:text-3xl font-black">Welcome to URFL Fan Hub</h1>
             <p className="text-muted-foreground text-sm">Your festive destination for all things BFFL</p>
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
         <Card className="xl:col-span-2 p-6 bg-gradient-to-br from-primary/10 via-background to-accent/10 border-2 border-primary/20 overflow-hidden relative">
           <div className="absolute top-4 right-4 flex gap-2">
@@ -112,7 +111,6 @@ export default function Landing() {
           </Button>
         </Card>
       </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -204,7 +202,6 @@ export default function Landing() {
           )}
         </div>
       </div>
-
       <div className="mb-8">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <Gift className="w-5 h-5 text-primary" />
@@ -239,7 +236,6 @@ export default function Landing() {
           })}
         </div>
       </div>
-
       <Card className="p-6 bg-gradient-to-r from-secondary/10 via-background to-primary/10 border-2 border-secondary/20">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
