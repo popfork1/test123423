@@ -22,6 +22,12 @@ interface BracketMatch {
   matchNumber: number;
 }
 
+interface BoxPosition {
+  id: string;
+  x: number;
+  y: number;
+}
+
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
 // Seed pairings for wildcard round
@@ -42,22 +48,21 @@ export default function Playoffs() {
     }))
   );
   const [matches, setMatches] = useState<BracketMatch[]>([
-    // Wildcard round (4 matches)
     { id: "wc1", round: "wildcard", matchNumber: 1, team1: undefined, team2: undefined },
     { id: "wc2", round: "wildcard", matchNumber: 2, team1: undefined, team2: undefined },
     { id: "wc3", round: "wildcard", matchNumber: 3, team1: undefined, team2: undefined },
     { id: "wc4", round: "wildcard", matchNumber: 4, team1: undefined, team2: undefined },
-    // Divisional round (4 matches)
     { id: "div1", round: "divisional", matchNumber: 1, team1: undefined, team2: undefined },
     { id: "div2", round: "divisional", matchNumber: 2, team1: undefined, team2: undefined },
     { id: "div3", round: "divisional", matchNumber: 3, team1: undefined, team2: undefined },
     { id: "div4", round: "divisional", matchNumber: 4, team1: undefined, team2: undefined },
-    // Conference round (2 matches)
     { id: "conf1", round: "conference", matchNumber: 1, team1: undefined, team2: undefined },
     { id: "conf2", round: "conference", matchNumber: 2, team1: undefined, team2: undefined },
-    // Super Bowl
     { id: "sb", round: "super_bowl", matchNumber: 1, team1: undefined, team2: undefined },
   ]);
+  const [boxPositions, setBoxPositions] = useState<Record<string, BoxPosition>>({});
+  const [draggedBox, setDraggedBox] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [initialized, setInitialized] = useState(false);
 
   const { data: dbMatches, refetch: refetchMatches } = useQuery<PlayoffMatch[]>({
@@ -65,7 +70,6 @@ export default function Playoffs() {
     enabled: false,
   });
 
-  // Initialize and load bracket
   useEffect(() => {
     const init = async () => {
       if (initialized) return;
@@ -82,7 +86,6 @@ export default function Playoffs() {
     init();
   }, [isAuthenticated, initialized, refetchMatches]);
 
-  // Update bracket when dbMatches loads
   useEffect(() => {
     if (!dbMatches || dbMatches.length === 0) return;
     
@@ -139,6 +142,36 @@ export default function Playoffs() {
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent, boxId: string) => {
+    if (!isAuthenticated) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setDraggedBox(boxId);
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!draggedBox || !isAuthenticated) return;
+
+    const container = (e.currentTarget as HTMLElement);
+    const rect = container.getBoundingClientRect();
+    
+    setBoxPositions(prev => ({
+      ...prev,
+      [draggedBox]: {
+        id: draggedBox,
+        x: e.clientX - rect.left - dragOffset.x,
+        y: e.clientY - rect.top - dragOffset.y,
+      }
+    }));
+  };
+
+  const handleMouseUp = () => {
+    setDraggedBox(null);
+  };
+
   const SeedBox = ({ seed }: { seed: BracketTeam }) => (
     <div className="border-2 border-border bg-card px-2 py-1 w-40 text-xs font-bold flex items-center gap-2 h-9 rounded" data-testid={`seed-${seed.seed}`}>
       <span className="text-muted-foreground text-xs">#{seed.seed}</span>
@@ -148,9 +181,20 @@ export default function Playoffs() {
 
   const MatchBox = ({ match, isTeam1, team }: { match: BracketMatch; isTeam1: boolean; team?: BracketTeam }) => {
     const logoUrl = team ? TEAMS[team.name as keyof typeof TEAMS] : undefined;
+    const pos = boxPositions[match.id];
+    const style = isAuthenticated && pos ? {
+      position: "absolute" as const,
+      left: `${pos.x}px`,
+      top: `${pos.y}px`,
+    } : {};
     
     return (
-      <div className="border border-border bg-card px-2 py-1 w-40 text-xs font-medium flex items-center gap-2 h-9 rounded" data-testid={isTeam1 ? `team1-${match.id}` : `team2-${match.id}`}>
+      <div 
+        className={`border border-border bg-card px-2 py-1 w-40 text-xs font-medium flex items-center gap-2 h-9 rounded ${isAuthenticated ? "cursor-grab active:cursor-grabbing" : ""}`}
+        style={style}
+        onMouseDown={(e) => handleMouseDown(e, match.id)}
+        data-testid={isTeam1 ? `team1-${match.id}` : `team2-${match.id}`}
+      >
         {logoUrl && (
           <img src={logoUrl} alt={team?.name} className="w-4 h-4 object-contain flex-shrink-0" />
         )}
@@ -191,11 +235,21 @@ export default function Playoffs() {
   const sbMatches = getMatchesForRound("super_bowl");
 
   return (
-    <div className="min-h-screen bg-background py-12 flex flex-col items-center justify-center">
-      <div className="overflow-x-auto w-full flex justify-center">
-        <div className="flex gap-20 pb-8 pt-8" style={{ alignItems: "center" }}>
+    <div 
+      className="min-h-screen bg-background py-12 flex flex-col items-center justify-center"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {isAuthenticated && (
+        <div className="text-center mb-4 text-sm text-muted-foreground">
+          Drag boxes to reposition bracket
+        </div>
+      )}
+      <div className="relative w-full overflow-auto flex justify-center">
+        <div className="flex gap-20 pb-8 pt-8" style={{ alignItems: "center", minHeight: "600px" }}>
           {/* SEEDS COLUMN */}
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-8 flex-shrink-0">
             {SEED_PAIRINGS.map((pairing, idx) => (
               <div key={idx} className="flex flex-col gap-1">
                 <SeedBox seed={seeds[pairing.seeds[0] - 1]} />
@@ -205,7 +259,7 @@ export default function Playoffs() {
           </div>
 
           {/* WILDCARD COLUMN */}
-          <div className="flex flex-col gap-20">
+          <div className="flex flex-col gap-20 flex-shrink-0 relative" style={{ minHeight: "500px" }}>
             {wcMatches.map((match, idx) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -215,7 +269,7 @@ export default function Playoffs() {
           </div>
 
           {/* DIVISIONAL COLUMN */}
-          <div className="flex flex-col gap-20">
+          <div className="flex flex-col gap-20 flex-shrink-0 relative" style={{ minHeight: "500px" }}>
             {divMatches.map((match) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -225,7 +279,7 @@ export default function Playoffs() {
           </div>
 
           {/* CONFERENCE COLUMN */}
-          <div className="flex flex-col gap-32 justify-center">
+          <div className="flex flex-col gap-32 flex-shrink-0 justify-center relative" style={{ minHeight: "500px" }}>
             {confMatches.map((match) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -235,7 +289,7 @@ export default function Playoffs() {
           </div>
 
           {/* SUPER BOWL COLUMN */}
-          <div className="flex flex-col gap-44 justify-center">
+          <div className="flex flex-col gap-44 flex-shrink-0 justify-center relative" style={{ minHeight: "500px" }}>
             {sbMatches.map((match) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
