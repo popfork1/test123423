@@ -49,7 +49,7 @@ export function Header() {
                 <Snowflake className="absolute -top-1 -right-1 w-3 h-3 text-blue-300 animate-pulse" />
               </div>
               <h1 className="text-xl md:text-2xl font-black text-foreground group-hover:text-primary transition-colors px-2 py-1 rounded-lg whitespace-nowrap">
-                BFFL Fan Hub
+                URFL Fan Hub
               </h1>
               <Gift className="w-5 h-5 text-primary hidden md:block animate-bounce" style={{ animationDuration: '2s' }} />
             </div>
