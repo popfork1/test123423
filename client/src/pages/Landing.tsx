@@ -245,7 +245,7 @@ export default function Landing() {
               <span>🎁</span>
             </div>
             <div>
-              <h3 className="font-bold text-lg">Happy Holidays from BFFL!</h3>
+              <h3 className="font-bold text-lg">Happy Holidays from URFL!</h3>
               <p className="text-muted-foreground text-sm">Enjoy the season and may the best team win!</p>
             </div>
           </div>
