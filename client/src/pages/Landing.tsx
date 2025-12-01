@@ -35,7 +35,7 @@ export default function Landing() {
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-black">Welcome to URFL Fan Hub</h1>
-            <p className="text-muted-foreground text-sm">Your festive destination for all things BFFL</p>
+            <p className="text-muted-foreground text-sm">Your festive destination for all things URFL</p>
           </div>
         </div>
       </div>
