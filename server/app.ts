@@ -30,11 +30,12 @@ declare module 'http' {
   }
 }
 app.use(express.json({
+  limit: '50mb',
   verify: (req, _res, buf) => {
     req.rawBody = buf;
   }
 }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -234,6 +235,15 @@ export default async function runApp(
           game_id VARCHAR NOT NULL,
           voted_for VARCHAR(100) NOT NULL,
           created_at TIMESTAMP DEFAULT NOW()
+        )
+      `;
+      
+      // Create bracket_images table
+      await rawSql`
+        CREATE TABLE IF NOT EXISTS bracket_images (
+          id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+          image_url TEXT NOT NULL,
+          updated_at TIMESTAMP DEFAULT NOW()
         )
       `;
       
