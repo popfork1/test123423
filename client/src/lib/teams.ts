@@ -23,4 +23,6 @@ export const TEAMS = {
   "Baltimore Ravens": "https://a.espncdn.com/media/motion/2024/0531/dm_240531_nfl_ravens.png",
   "Dallas Cowboys": "https://a.espncdn.com/media/motion/2024/0531/dm_240531_nfl_cowboys.png",
   "Philadelphia Eagles": "https://a.espncdn.com/media/motion/2024/0531/dm_240531_nfl_eagles.png",
+  "Chicago Bears": "https://a.espncdn.com/media/motion/2024/0531/dm_240531_nfl_bears.png",
+  "Jacksonville Jaguars": "https://a.espncdn.com/media/motion/2024/0531/dm_240531_nfl_jaguars.png",
 };
