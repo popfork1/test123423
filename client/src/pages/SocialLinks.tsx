@@ -35,11 +35,8 @@ export default function SocialLinks() {
         <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
           Connect With Us
         </h1>
-        <p className="text-muted-foreground text-lg">
-          Follow BFFL on social media and stay updated with the latest news, updates, and announcements
-        </p>
+        <p className="text-muted-foreground text-lg">Follow URFL on social media and stay updated with the latest news, updates, and announcements</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {socialLinks.map((link) => (
           <Card
@@ -64,7 +61,6 @@ export default function SocialLinks() {
           </Card>
         ))}
       </div>
-
       <div className="mt-16 mb-12">
         <h2 className="text-3xl font-bold mb-8" data-testid="text-feedback-title">
           Send Feedback
