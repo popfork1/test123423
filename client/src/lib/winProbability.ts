@@ -21,14 +21,16 @@ export function calculateWinProbability(
   const pdDifference = team1PD - team2PD;
   let probability = 50 + (pdDifference / 20); // Each 20 points PD = 10% swing
   
-  console.log(`[WinProb] ${game.team1} vs ${game.team2} - Quarter: ${game.quarter}, Scores: ${game.team1Score}-${game.team2Score}, PD: ${team1PD}-${team2PD}`);
-  
   // Factor in score if game has started (quarter is not "Scheduled")
   if (game.quarter && game.quarter !== "Scheduled") {
     const scoreDifference = game.team1Score! - game.team2Score!;
     
     // Quarter weight multiplier - increases with game progress
     const quarterMap: { [key: string]: number } = {
+      "1st": 0.3,
+      "2nd": 0.5,
+      "3rd": 0.75,
+      "4th": 1.0,
       "Q1": 0.3,
       "Q2": 0.5,
       "Q3": 0.75,
@@ -39,13 +41,11 @@ export function calculateWinProbability(
     
     // Score impact is more realistic: every 7 points = ~10% swing in later quarters
     const scoreImpact = (scoreDifference / 7) * 10 * quarterWeight;
-    console.log(`[WinProb] Score diff: ${scoreDifference}, Quarter weight: ${quarterWeight}, Score impact: ${scoreImpact}`);
     probability += scoreImpact;
   }
   
   // Cap between 1% and 99% (allow extreme differentials to show)
   probability = Math.max(1, Math.min(99, Math.round(probability)));
-  console.log(`[WinProb] Final probability for ${team}: ${probability}`);
   
   // Return probability for the requested team
   if (team === "team1") {
