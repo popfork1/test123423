@@ -14,71 +14,7 @@ export function GameCard({ game, onClick }: GameCardProps) {
   const team1Logo = TEAMS[game.team1 as keyof typeof TEAMS];
 
   return (
-    <div className="relative">
-      {/* Twinkling lights border */}
-      <div className="absolute inset-0 pointer-events-none rounded-md overflow-hidden">
-        {/* Top lights */}
-        <div className="absolute top-0 left-0 right-0 h-1 flex justify-around gap-0.5">
-          {Array.from({ length: 16 }).map((_, i) => (
-            <div
-              key={`top-${i}`}
-              className="flex-1 rounded-full"
-              style={{
-                animation: `twinkle 0.8s ease-in-out infinite`,
-                animationDelay: (i * 0.08) + 's',
-                backgroundColor: i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
-                boxShadow: `0 0 6px currentColor`,
-              }}
-            />
-          ))}
-        </div>
-        {/* Bottom lights */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 flex justify-around gap-0.5">
-          {Array.from({ length: 16 }).map((_, i) => (
-            <div
-              key={`bottom-${i}`}
-              className="flex-1 rounded-full"
-              style={{
-                animation: `twinkle 0.8s ease-in-out infinite`,
-                animationDelay: (i * 0.08 + 0.4) + 's',
-                backgroundColor: i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
-                boxShadow: `0 0 6px currentColor`,
-              }}
-            />
-          ))}
-        </div>
-        {/* Left lights */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 flex flex-col justify-around gap-0.5">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={`left-${i}`}
-              className="h-1 rounded-full"
-              style={{
-                animation: `twinkle 0.8s ease-in-out infinite`,
-                animationDelay: (i * 0.12) + 's',
-                backgroundColor: i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
-                boxShadow: `0 0 6px currentColor`,
-              }}
-            />
-          ))}
-        </div>
-        {/* Right lights */}
-        <div className="absolute right-0 top-0 bottom-0 w-1 flex flex-col justify-around gap-0.5">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div
-              key={`right-${i}`}
-              className="h-1 rounded-full"
-              style={{
-                animation: `twinkle 0.8s ease-in-out infinite`,
-                animationDelay: (i * 0.12 + 0.4) + 's',
-                backgroundColor: i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
-                boxShadow: `0 0 6px currentColor`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="relative" style={{ margin: '12px' }}>
       <Card
         className={`p-6 cursor-pointer hover-elevate active-elevate-2 ${game.isLive ? 'border-primary' : ''}`}
         onClick={onClick}
@@ -131,6 +67,76 @@ export function GameCard({ game, onClick }: GameCardProps) {
         )}
       </div>
       </Card>
+
+      {/* Twinkling lights hanging around card */}
+      <div className="absolute -inset-3 pointer-events-none rounded-md" style={{ margin: '-12px' }}>
+        {/* Top lights */}
+        <div className="absolute -top-2 left-0 right-0 h-2 flex justify-around gap-0.5 px-1">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div
+              key={`top-${i}`}
+              className="flex-1 rounded-full"
+              style={{
+                animation: `twinkle 0.8s ease-in-out infinite`,
+                animationDelay: (i * 0.08) + 's',
+                backgroundColor: i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                boxShadow: `0 0 8px currentColor`,
+                minHeight: '8px',
+              }}
+            />
+          ))}
+        </div>
+        {/* Bottom lights */}
+        <div className="absolute -bottom-2 left-0 right-0 h-2 flex justify-around gap-0.5 px-1">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div
+              key={`bottom-${i}`}
+              className="flex-1 rounded-full"
+              style={{
+                animation: `twinkle 0.8s ease-in-out infinite`,
+                animationDelay: (i * 0.08 + 0.4) + 's',
+                backgroundColor: i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                boxShadow: `0 0 8px currentColor`,
+                minHeight: '8px',
+              }}
+            />
+          ))}
+        </div>
+        {/* Left lights */}
+        <div className="absolute left-0 top-0 bottom-0 -left-2 flex flex-col justify-around gap-0.5 py-1">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={`left-${i}`}
+              className="rounded-full"
+              style={{
+                animation: `twinkle 0.8s ease-in-out infinite`,
+                animationDelay: (i * 0.12) + 's',
+                backgroundColor: i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                boxShadow: `0 0 8px currentColor`,
+                width: '8px',
+                height: '8px',
+              }}
+            />
+          ))}
+        </div>
+        {/* Right lights */}
+        <div className="absolute right-0 top-0 bottom-0 -right-2 flex flex-col justify-around gap-0.5 py-1">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={`right-${i}`}
+              className="rounded-full"
+              style={{
+                animation: `twinkle 0.8s ease-in-out infinite`,
+                animationDelay: (i * 0.12 + 0.4) + 's',
+                backgroundColor: i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                boxShadow: `0 0 8px currentColor`,
+                width: '8px',
+                height: '8px',
+              }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

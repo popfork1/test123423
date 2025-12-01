@@ -211,7 +211,78 @@ export default function GameDetail() {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 p-6">
+        <div className="lg:col-span-2 relative" style={{ margin: '12px' }}>
+          {/* Twinkling lights hanging around game card */}
+          <div className="absolute -inset-3 pointer-events-none rounded-md" style={{ margin: '-12px' }}>
+            {/* Top lights */}
+            <div className="absolute -top-2 left-0 right-0 h-2 flex justify-around gap-0.5 px-1">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div
+                  key={`top-${i}`}
+                  className="flex-1 rounded-full"
+                  style={{
+                    animation: `twinkle 0.8s ease-in-out infinite`,
+                    animationDelay: (i * 0.08) + 's',
+                    backgroundColor: i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                    boxShadow: `0 0 8px currentColor`,
+                    minHeight: '8px',
+                  }}
+                />
+              ))}
+            </div>
+            {/* Bottom lights */}
+            <div className="absolute -bottom-2 left-0 right-0 h-2 flex justify-around gap-0.5 px-1">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div
+                  key={`bottom-${i}`}
+                  className="flex-1 rounded-full"
+                  style={{
+                    animation: `twinkle 0.8s ease-in-out infinite`,
+                    animationDelay: (i * 0.08 + 0.4) + 's',
+                    backgroundColor: i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                    boxShadow: `0 0 8px currentColor`,
+                    minHeight: '8px',
+                  }}
+                />
+              ))}
+            </div>
+            {/* Left lights */}
+            <div className="absolute left-0 top-0 bottom-0 -left-2 flex flex-col justify-around gap-0.5 py-1">
+              {Array.from({ length: 14 }).map((_, i) => (
+                <div
+                  key={`left-${i}`}
+                  className="rounded-full"
+                  style={{
+                    animation: `twinkle 0.8s ease-in-out infinite`,
+                    animationDelay: (i * 0.12) + 's',
+                    backgroundColor: i % 3 === 0 ? 'hsl(0 78% 48%)' : i % 3 === 1 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                    boxShadow: `0 0 8px currentColor`,
+                    width: '8px',
+                    height: '8px',
+                  }}
+                />
+              ))}
+            </div>
+            {/* Right lights */}
+            <div className="absolute right-0 top-0 bottom-0 -right-2 flex flex-col justify-around gap-0.5 py-1">
+              {Array.from({ length: 14 }).map((_, i) => (
+                <div
+                  key={`right-${i}`}
+                  className="rounded-full"
+                  style={{
+                    animation: `twinkle 0.8s ease-in-out infinite`,
+                    animationDelay: (i * 0.12 + 0.4) + 's',
+                    backgroundColor: i % 3 === 1 ? 'hsl(0 78% 48%)' : i % 3 === 2 ? 'hsl(43 96% 56%)' : 'hsl(138 44% 32%)',
+                    boxShadow: `0 0 8px currentColor`,
+                    width: '8px',
+                    height: '8px',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <Card className="p-6">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <Badge
@@ -350,7 +421,8 @@ export default function GameDetail() {
               </div>
             )}
           </div>
-        </Card>
+          </Card>
+        </div>
 
         <Card className="h-[600px] flex flex-col overflow-hidden">
           <ChatComponent
