@@ -23,6 +23,4 @@ export const TEAMS = {
   "Baltimore Ravens": "https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
   "Dallas Cowboys": "https://a.espncdn.com/i/teamlogos/nfl/500/dal.png",
   "Philadelphia Eagles": "https://a.espncdn.com/i/teamlogos/nfl/500/phi.png",
-  "Chicago Bears": "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png",
-  "Jacksonville Jaguars": "https://a.espncdn.com/i/teamlogos/nfl/500/jax.png",
 };
