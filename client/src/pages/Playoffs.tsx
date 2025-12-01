@@ -204,7 +204,7 @@ export default function Playoffs() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-8">
+    <div className="min-h-screen bg-background py-8 flex flex-col items-center">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold" data-testid="text-page-title">BFFL Playoff Bracket</h1>
         <p className="text-muted-foreground text-sm">12 Team Championship Bracket</p>
@@ -223,11 +223,11 @@ export default function Playoffs() {
         )}
       </div>
 
-      <div className="overflow-x-auto px-4">
-        <div className="flex gap-12 items-start min-w-max pb-8 justify-center">
+      <div className="overflow-x-auto w-full flex justify-center">
+        <div className="flex gap-16 items-center pb-8">
           {/* SEEDS COLUMN */}
           <div className="flex flex-col gap-8">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Seeds</div>
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center h-6">Seeds</div>
             <div className="flex flex-col gap-2">
               {SEED_PAIRINGS.map((pairing, idx) => (
                 <div key={idx} className="flex flex-col gap-1">
@@ -241,8 +241,8 @@ export default function Playoffs() {
 
           {/* WILDCARD COLUMN */}
           <div className="flex flex-col gap-8">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Wildcard</div>
-            <div className="flex flex-col gap-2">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center h-6">Wildcard</div>
+            <div className="flex flex-col gap-2 justify-center">
               {getMatchesForRound("wildcard").map((match) => (
                 <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                   <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -255,8 +255,8 @@ export default function Playoffs() {
 
           {/* DIVISIONAL COLUMN */}
           <div className="flex flex-col gap-8">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Divisional</div>
-            <div className="flex flex-col gap-2">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center h-6">Divisional</div>
+            <div className="flex flex-col gap-2 justify-center">
               {getMatchesForRound("divisional").map((match) => (
                 <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                   <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -269,8 +269,8 @@ export default function Playoffs() {
 
           {/* CONFERENCE COLUMN */}
           <div className="flex flex-col gap-8">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Conference</div>
-            <div className="flex flex-col gap-2">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center h-6">Conference</div>
+            <div className="flex flex-col gap-2 justify-center">
               {getMatchesForRound("conference").map((match) => (
                 <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                   <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -283,8 +283,8 @@ export default function Playoffs() {
 
           {/* SUPER BOWL COLUMN */}
           <div className="flex flex-col gap-8">
-            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center">Super Bowl</div>
-            <div className="flex flex-col gap-2">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider text-center h-6">Super Bowl</div>
+            <div className="flex flex-col gap-2 justify-center">
               {getMatchesForRound("super_bowl").map((match) => (
                 <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                   <MatchBox match={match} isTeam1={true} team={match.team1} />
