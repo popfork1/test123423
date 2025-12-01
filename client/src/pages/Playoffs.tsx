@@ -278,10 +278,6 @@ export default function Playoffs() {
             <SeedBox seed={seeds[10]} />
             <div className="h-3" />
             
-            <SeedBox seed={seeds[6]} />
-            <SeedBox seed={seeds[9]} />
-            <div className="h-3" />
-            
             {/* Top seeds: 1, 4, 2, 3 */}
             <SeedBox seed={seeds[0]} />
             <SeedBox seed={seeds[3]} />
@@ -298,26 +294,12 @@ export default function Playoffs() {
               <MatchBox match={wcMatches[0]!} isTeam1={true} team={wcMatches[0]?.team1} />
               <MatchBox match={wcMatches[0]!} isTeam1={false} team={wcMatches[0]?.team2} />
             </div>
-            <div className="h-4" />
+            <div className="h-12" />
             
             {/* Match 2 (8 vs 9) */}
             <div className="flex flex-col gap-0.5" data-testid={`card-match-${wcMatches[1]?.id}`}>
               <MatchBox match={wcMatches[1]!} isTeam1={true} team={wcMatches[1]?.team1} />
               <MatchBox match={wcMatches[1]!} isTeam1={false} team={wcMatches[1]?.team2} />
-            </div>
-            <div className="h-4" />
-            
-            {/* Match 3 (6 vs 11) */}
-            <div className="flex flex-col gap-0.5" data-testid={`card-match-${wcMatches[2]?.id}`}>
-              <MatchBox match={wcMatches[2]!} isTeam1={true} team={wcMatches[2]?.team1} />
-              <MatchBox match={wcMatches[2]!} isTeam1={false} team={wcMatches[2]?.team2} />
-            </div>
-            <div className="h-4" />
-            
-            {/* Match 4 (7 vs 10) */}
-            <div className="flex flex-col gap-0.5" data-testid={`card-match-${wcMatches[3]?.id}`}>
-              <MatchBox match={wcMatches[3]!} isTeam1={true} team={wcMatches[3]?.team1} />
-              <MatchBox match={wcMatches[3]!} isTeam1={false} team={wcMatches[3]?.team2} />
             </div>
           </div>
 
