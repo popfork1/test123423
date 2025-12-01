@@ -18,7 +18,7 @@ interface StandingsEntry {
   wins: number;
   losses: number;
   pointDifferential?: number;
-  division: "AFC_East" | "AFC_South" | "NFC_East" | "NFC_South";
+  division: "AFC_D1" | "AFC_D2" | "NFC_D1" | "NFC_D2";
   manualOrder?: number;
 }
 
@@ -30,10 +30,10 @@ interface DropZone {
 
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
-const DIVISIONS = ["AFC_East", "AFC_South", "NFC_East", "NFC_South"] as const;
+const DIVISIONS = ["AFC_D1", "AFC_D2", "NFC_D1", "NFC_D2"] as const;
 const CONFERENCES = [
-  { name: "AFC", divisions: ["AFC_East", "AFC_South"] },
-  { name: "NFC", divisions: ["NFC_East", "NFC_South"] },
+  { name: "AFC", divisions: [{ id: "AFC_D1", label: "Division 1" }, { id: "AFC_D2", label: "Division 2" }] },
+  { name: "NFC", divisions: [{ id: "NFC_D1", label: "Division 1" }, { id: "NFC_D2", label: "Division 2" }] },
 ];
 
 export default function Standings() {
@@ -41,7 +41,7 @@ export default function Standings() {
   const { toast } = useToast();
   const [standings, setStandings] = useState<StandingsEntry[]>([]);
   const [newTeam, setNewTeam] = useState("");
-  const [newDivision, setNewDivision] = useState<"AFC_East" | "AFC_South" | "NFC_East" | "NFC_South">("AFC_East");
+  const [newDivision, setNewDivision] = useState<"AFC_D1" | "AFC_D2" | "NFC_D1" | "NFC_D2">("AFC_D1");
   const [editingPD, setEditingPD] = useState<Record<string, string>>({});
   const [draggedTeam, setDraggedTeam] = useState<string | null>(null);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
@@ -277,7 +277,7 @@ export default function Standings() {
               </div>
               <div>
                 <Label htmlFor="division-select">Division</Label>
-                <Select value={newDivision} onValueChange={(v) => setNewDivision(v as "AFC_East" | "AFC_South" | "NFC_East" | "NFC_South")}>
+                <Select value={newDivision} onValueChange={(v) => setNewDivision(v as "AFC_D1" | "AFC_D2" | "NFC_D1" | "NFC_D2")}>
                   <SelectTrigger id="division-select" data-testid="select-division">
                     <SelectValue placeholder="Select division" />
                   </SelectTrigger>
@@ -286,8 +286,8 @@ export default function Standings() {
                       <div key={conf.name}>
                         <div className="font-bold text-sm px-2 py-2 text-muted-foreground">{conf.name}</div>
                         {conf.divisions.map((div) => (
-                          <SelectItem key={div} value={div}>
-                            {div.replace("_", " ")}
+                          <SelectItem key={div.id} value={div.id}>
+                            {div.label}
                           </SelectItem>
                         ))}
                       </div>
@@ -311,10 +311,10 @@ export default function Standings() {
             <h2 className="text-3xl font-bold mb-6 text-primary">{conference.name}</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {conference.divisions.map((division) => {
-                const divisionStandings = getDivisionStandings(division);
+                const divisionStandings = getDivisionStandings(division.id);
                 return (
-                  <div key={division}>
-                    <h3 className="text-xl font-bold mb-4">{division.replace("_", " ")}</h3>
+                  <div key={division.id}>
+                    <h3 className="text-xl font-bold mb-4">{division.label}</h3>
               {divisionStandings.length > 0 ? (
                 <Card className="overflow-hidden">
                   <div className="overflow-x-auto">
