@@ -18,7 +18,7 @@ interface StandingsEntry {
   wins: number;
   losses: number;
   pointDifferential?: number;
-  division: "D1" | "D2" | "D3" | "D4";
+  division: "AFC_East" | "AFC_South" | "NFC_East" | "NFC_South";
   manualOrder?: number;
 }
 
@@ -30,14 +30,18 @@ interface DropZone {
 
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
-const DIVISIONS = ["D1", "D2", "D3", "D4"] as const;
+const DIVISIONS = ["AFC_East", "AFC_South", "NFC_East", "NFC_South"] as const;
+const CONFERENCES = [
+  { name: "AFC", divisions: ["AFC_East", "AFC_South"] },
+  { name: "NFC", divisions: ["NFC_East", "NFC_South"] },
+];
 
 export default function Standings() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [standings, setStandings] = useState<StandingsEntry[]>([]);
   const [newTeam, setNewTeam] = useState("");
-  const [newDivision, setNewDivision] = useState<"D1" | "D2" | "D3" | "D4">("D1");
+  const [newDivision, setNewDivision] = useState<"AFC_East" | "AFC_South" | "NFC_East" | "NFC_South">("AFC_East");
   const [editingPD, setEditingPD] = useState<Record<string, string>>({});
   const [draggedTeam, setDraggedTeam] = useState<string | null>(null);
   const [dropZone, setDropZone] = useState<DropZone | null>(null);
@@ -273,15 +277,20 @@ export default function Standings() {
               </div>
               <div>
                 <Label htmlFor="division-select">Division</Label>
-                <Select value={newDivision} onValueChange={(v) => setNewDivision(v as "D1" | "D2" | "D3" | "D4")}>
+                <Select value={newDivision} onValueChange={(v) => setNewDivision(v as "AFC_East" | "AFC_South" | "NFC_East" | "NFC_South")}>
                   <SelectTrigger id="division-select" data-testid="select-division">
                     <SelectValue placeholder="Select division" />
                   </SelectTrigger>
                   <SelectContent>
-                    {DIVISIONS.map((div) => (
-                      <SelectItem key={div} value={div}>
-                        {div}
-                      </SelectItem>
+                    {CONFERENCES.map((conf) => (
+                      <div key={conf.name}>
+                        <div className="font-bold text-sm px-2 py-2 text-muted-foreground">{conf.name}</div>
+                        {conf.divisions.map((div) => (
+                          <SelectItem key={div} value={div}>
+                            {div.replace("_", " ")}
+                          </SelectItem>
+                        ))}
+                      </div>
                     ))}
                   </SelectContent>
                 </Select>
@@ -297,11 +306,15 @@ export default function Standings() {
       )}
 
       <div className="space-y-8">
-        {DIVISIONS.map((division) => {
-          const divisionStandings = getDivisionStandings(division);
-          return (
-            <div key={division}>
-              <h2 className="text-2xl font-bold mb-4">{division}</h2>
+        {CONFERENCES.map((conference) => (
+          <div key={conference.name}>
+            <h2 className="text-3xl font-bold mb-6 text-primary">{conference.name}</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {conference.divisions.map((division) => {
+                const divisionStandings = getDivisionStandings(division);
+                return (
+                  <div key={division}>
+                    <h3 className="text-xl font-bold mb-4">{division.replace("_", " ")}</h3>
               {divisionStandings.length > 0 ? (
                 <Card className="overflow-hidden">
                   <div className="overflow-x-auto">
@@ -437,14 +450,17 @@ export default function Standings() {
                     </table>
                   </div>
                 </Card>
-              ) : (
-                <Card className="p-8 text-center">
-                  <p className="text-muted-foreground">No teams in this division yet.</p>
-                </Card>
-              )}
+                ) : (
+                  <Card className="p-8 text-center">
+                    <p className="text-muted-foreground">No teams in this division yet.</p>
+                  </Card>
+                )}
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );
