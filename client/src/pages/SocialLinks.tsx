@@ -17,7 +17,7 @@ export default function SocialLinks() {
       title: "Discord",
       description: "Join the Discord server",
       icon: <SiDiscord className="w-8 h-8" />,
-      url: "https://discord.gg/u9w6mNQkhy",
+      url: "https://discord.gg/xTt9BrCaZF",
       color: "hover:text-indigo-500",
     },
     {
