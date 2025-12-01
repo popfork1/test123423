@@ -313,6 +313,78 @@
   }
 }
 
+/* Christmas Snowflake Animation */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) translateX(0px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes snowfall-2 {
+  0% {
+    transform: translateY(-10vh) translateX(0px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Twinkling lights */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes twinkle-delayed {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Christmas tree lights effect */
+@keyframes light-pulse {
+  0%, 100% {
+    background-color: hsl(0 78% 48%);
+    box-shadow: 0 0 10px hsl(0 78% 48% / 0.5);
+  }
+  25% {
+    background-color: hsl(43 96% 56%);
+    box-shadow: 0 0 10px hsl(43 96% 56% / 0.5);
+  }
+  50% {
+    background-color: hsl(138 44% 32%);
+    box-shadow: 0 0 10px hsl(138 44% 32% / 0.5);
+  }
+  75% {
+    background-color: hsl(0 78% 48%);
+    box-shadow: 0 0 10px hsl(0 78% 48% / 0.5);
+  }
+}
+
+/* Tinsel shimmer */
+@keyframes shimmer {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .confetti-container {
   position: fixed;
   pointer-events: none;
