@@ -24,22 +24,6 @@ interface BracketMatch {
 
 const AVAILABLE_TEAMS = Object.keys(TEAMS);
 
-// Seed pairings for wildcard round
-const SEED_PAIRINGS = [
-  { seeds: [5, 12], matchNumber: 1 },
-  { seeds: [8, 9], matchNumber: 2 },
-  { seeds: [6, 11], matchNumber: 3 },
-  { seeds: [7, 10], matchNumber: 4 },
-];
-
-// Top 4 seeds divisional matchups
-const TOP_SEEDS_DIVISIONAL = [
-  { seeds: [1, 8], matchNumber: 1 },  // #1 seed vs wildcard winner (8/9)
-  { seeds: [4, 5], matchNumber: 2 },  // #4 seed vs wildcard winner (5/12)
-  { seeds: [2, 7], matchNumber: 3 },  // #2 seed vs wildcard winner (7/10)
-  { seeds: [3, 6], matchNumber: 4 },  // #3 seed vs wildcard winner (6/11)
-];
-
 export default function Playoffs() {
   const { isAuthenticated } = useAuth();
   const [seeds, setSeeds] = useState<BracketTeam[]>(
@@ -73,7 +57,6 @@ export default function Playoffs() {
     enabled: false,
   });
 
-  // Initialize and load bracket
   useEffect(() => {
     const init = async () => {
       if (initialized) return;
@@ -90,7 +73,6 @@ export default function Playoffs() {
     init();
   }, [isAuthenticated, initialized, refetchMatches]);
 
-  // Update bracket when dbMatches loads
   useEffect(() => {
     if (!dbMatches || dbMatches.length === 0) return;
     
@@ -111,12 +93,18 @@ export default function Playoffs() {
     setMatches(newMatches);
   }, [dbMatches]);
 
-  // Populate bracket when seeds change
+  // Populate wildcard matches from seeds 5-12
   useEffect(() => {
+    const wcPairings = [
+      { matchNumber: 1, seeds: [5, 12] },
+      { matchNumber: 2, seeds: [8, 9] },
+      { matchNumber: 3, seeds: [6, 11] },
+      { matchNumber: 4, seeds: [7, 10] },
+    ];
+
     const populatedMatches = matches.map((match) => {
-      // Wildcard round - seeds 5-12
       if (match.round === "wildcard") {
-        const pairing = SEED_PAIRINGS.find(p => p.matchNumber === match.matchNumber);
+        const pairing = wcPairings.find(p => p.matchNumber === match.matchNumber);
         if (pairing) {
           const seed1 = seeds[pairing.seeds[0] - 1];
           const seed2 = seeds[pairing.seeds[1] - 1];
@@ -127,29 +115,32 @@ export default function Playoffs() {
           };
         }
       }
-      
-      // Divisional round - top 4 seeds + wildcard winners
+
+      // Divisional: top 4 seeds vs wildcard winners
       if (match.round === "divisional") {
-        const pairing = TOP_SEEDS_DIVISIONAL.find(p => p.matchNumber === match.matchNumber);
-        if (pairing) {
-          const seed1 = seeds[pairing.seeds[0] - 1];
-          const seed2 = seeds[pairing.seeds[1] - 1];
-          const team1 = seed1?.name ? { id: `${match.id}-t1`, name: seed1.name, seed: seed1.seed } : undefined;
-          
-          // Seed 2 slot is wildcard winner - use whoever it is or the seed
-          const team2 = seed2?.name ? { id: `${match.id}-t2`, name: seed2.name, seed: seed2.seed } : undefined;
+        const topSeedsDivisional = [
+          { matchNumber: 1, topSeed: 1, wcMatch: 1 },  // #1 vs winner of 5/12
+          { matchNumber: 2, topSeed: 4, wcMatch: 2 },  // #4 vs winner of 8/9
+          { matchNumber: 3, topSeed: 2, wcMatch: 4 },  // #2 vs winner of 7/10
+          { matchNumber: 4, topSeed: 3, wcMatch: 3 },  // #3 vs winner of 6/11
+        ];
+
+        const div = topSeedsDivisional.find(d => d.matchNumber === match.matchNumber);
+        if (div) {
+          const topSeed = seeds[div.topSeed - 1];
+          const wcMatch = matches.find(m => m.round === "wildcard" && m.matchNumber === div.wcMatch);
           
           return {
             ...match,
-            team1,
-            team2,
+            team1: topSeed?.name ? { id: `${match.id}-t1`, name: topSeed.name, seed: topSeed.seed } : undefined,
+            team2: wcMatch?.team1 || wcMatch?.team2 ? (wcMatch.team1 || wcMatch.team2) : undefined,
           };
         }
       }
-      
+
       return match;
     });
-    
+
     setMatches(populatedMatches);
   }, [seeds]);
 
@@ -230,7 +221,7 @@ export default function Playoffs() {
           <img src={logoUrl} alt={team?.name} className="w-4 h-4 object-contain flex-shrink-0" />
         )}
         <div className="flex-1 min-w-0">
-          {isAuthenticated ? (
+          {isAuthenticated && (match.round === "conference" || match.round === "super_bowl") ? (
             <Select value={team?.name || ""} onValueChange={(value) => {
               updateMatch(match.id, isTeam1, value);
             }}>
@@ -265,23 +256,23 @@ export default function Playoffs() {
   const confMatches = getMatchesForRound("conference");
   const sbMatches = getMatchesForRound("super_bowl");
 
+  // Seeds column order: 5, 12, 8, 9, 6, 11, 7, 10, 1, 4, 2, 3
+  const seedOrder = [5, 12, 8, 9, 6, 11, 7, 10, 1, 4, 2, 3];
+
   return (
     <div className="min-h-screen bg-background py-12 flex flex-col items-center justify-center">
       <div className="overflow-x-auto w-full flex justify-center">
         <div className="flex gap-20 pb-8 pt-8" style={{ alignItems: "center" }}>
           {/* SEEDS COLUMN */}
-          <div className="flex flex-col gap-8">
-            {SEED_PAIRINGS.map((pairing, idx) => (
-              <div key={idx} className="flex flex-col gap-1">
-                <SeedBox seed={seeds[pairing.seeds[0] - 1]} />
-                <SeedBox seed={seeds[pairing.seeds[1] - 1]} />
-              </div>
+          <div className="flex flex-col gap-1">
+            {seedOrder.map((seedNum) => (
+              <SeedBox key={seedNum} seed={seeds[seedNum - 1]} />
             ))}
           </div>
 
           {/* WILDCARD COLUMN */}
-          <div className="flex flex-col gap-20">
-            {wcMatches.map((match, idx) => (
+          <div className="flex flex-col gap-4">
+            {wcMatches.map((match) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
                 <MatchBox match={match} isTeam1={false} team={match.team2} />
@@ -290,7 +281,7 @@ export default function Playoffs() {
           </div>
 
           {/* DIVISIONAL COLUMN */}
-          <div className="flex flex-col gap-20">
+          <div className="flex flex-col gap-4">
             {divMatches.map((match) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
@@ -300,7 +291,7 @@ export default function Playoffs() {
           </div>
 
           {/* CONFERENCE COLUMN */}
-          <div className="flex flex-col gap-32 justify-center">
+          <div className="flex flex-col gap-16 justify-center">
             {confMatches.map((match) => (
               <div key={match.id} className="flex flex-col gap-0.5" data-testid={`card-match-${match.id}`}>
                 <MatchBox match={match} isTeam1={true} team={match.team1} />
