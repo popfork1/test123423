@@ -280,7 +280,6 @@ export default function Playoffs() {
             
             <SeedBox seed={seeds[6]} />
             <SeedBox seed={seeds[9]} />
-            <div className="h-20" />
             
             {/* Top seeds: 1, 4, 2, 3 */}
             <SeedBox seed={seeds[0]} />
