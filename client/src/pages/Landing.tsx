@@ -140,6 +140,7 @@ export default function Landing() {
                   key={game.id}
                   game={game}
                   onClick={() => setLocation(`/game/${game.id}`)}
+                  showLights={false}
                 />
               ))}
             </div>
