@@ -247,11 +247,8 @@ export default function Standings() {
         <h1 className="text-4xl md:text-5xl font-black mb-4" data-testid="text-page-title">
           Standings
         </h1>
-        <p className="text-muted-foreground text-lg">
-          BFFL Season 1 Standings
-        </p>
+        <p className="text-muted-foreground text-lg">URFL Season 1 Standings</p>
       </div>
-
       {isAuthenticated && (
         <Card className="p-6 mb-8">
           <h2 className="text-xl font-bold mb-4">Add Team</h2>
@@ -304,7 +301,6 @@ export default function Standings() {
           </div>
         </Card>
       )}
-
       <div className="space-y-8">
         {CONFERENCES.map((conference) => (
           <div key={conference.name}>
