@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, Shield, Moon, Sun, Zap, Calendar, Trophy, BarChart3, Newspaper, Target, Link2, Users, BookOpen } from "lucide-react";
+import { Menu, X, Shield, Moon, Sun, Zap, Calendar, Trophy, BarChart3, Newspaper, Target, Users, BookOpen, Snowflake, Gift } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -16,35 +16,62 @@ export function Header() {
     { path: "/schedule", label: "Schedule", icon: Calendar },
     { path: "/playoffs", label: "Playoffs", icon: Trophy },
     { path: "/standings", label: "Standings", icon: BarChart3 },
-    { path: "/previous-weeks", label: "Previous Weeks", icon: Calendar },
+    { path: "/previous-weeks", label: "Archives", icon: Calendar },
     { path: "/news", label: "News", icon: Newspaper },
     { path: "/pickems", label: "Pick'ems", icon: Target },
     { path: "/social", label: "Social", icon: Users },
-    { path: "/changelogs", label: "Changelogs", icon: BookOpen },
+    { path: "/changelogs", label: "Updates", icon: BookOpen },
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-primary/20 bg-background/95 backdrop-blur-md">
+      <div className="christmas-lights absolute top-0 left-0 right-0 h-1 overflow-hidden">
+        <div className="flex gap-8 animate-marquee">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{
+                animation: `light-pulse ${1.5 + (i % 3) * 0.5}s ease-in-out infinite`,
+                animationDelay: `${(i % 4) * 0.3}s`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-8">
-          <Link href="/" data-testid="link-home" className="flex-shrink-0">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground hover-elevate active-elevate-2 px-3 py-2 rounded-md cursor-pointer whitespace-nowrap">
-              BFFL Fan Hub
-            </h1>
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link href="/" data-testid="link-home" className="flex-shrink-0 group">
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <span className="text-2xl">🎄</span>
+                <Snowflake className="absolute -top-1 -right-1 w-3 h-3 text-blue-300 animate-pulse" />
+              </div>
+              <h1 className="text-xl md:text-2xl font-black text-foreground group-hover:text-primary transition-colors px-2 py-1 rounded-lg whitespace-nowrap">
+                BFFL Fan Hub
+              </h1>
+              <Gift className="w-5 h-5 text-primary hidden md:block animate-bounce" style={{ animationDuration: '2s' }} />
+            </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link key={item.path} href={item.path} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                <Button
-                  variant={location === item.path ? "secondary" : "ghost"}
-                  size="sm"
-                  className="font-medium"
-                >
-                  {item.label}
-                </Button>
-              </Link>
-            ))}
+          <nav className="hidden xl:flex items-center gap-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = location === item.path;
+              return (
+                <Link key={item.path} href={item.path} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Button
+                    variant={isActive ? "default" : "ghost"}
+                    size="sm"
+                    className={`font-medium gap-1.5 transition-all ${isActive ? 'shadow-lg shadow-primary/25' : 'hover:bg-primary/10'}`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </Button>
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -52,14 +79,19 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
+              className="relative overflow-hidden group"
               data-testid="button-theme-toggle"
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? (
+                <Sun className="w-5 h-5 text-yellow-400 group-hover:rotate-180 transition-transform duration-500" />
+              ) : (
+                <Moon className="w-5 h-5 group-hover:-rotate-12 transition-transform duration-300" />
+              )}
             </Button>
 
             {isAuthenticated && (
               <Link href="/admin" data-testid="link-admin">
-                <Button variant="outline" size="sm" className="hidden lg:flex gap-2">
+                <Button variant="outline" size="sm" className="hidden lg:flex gap-2 border-primary/30 hover:border-primary hover:bg-primary/10">
                   <Shield className="w-4 h-4" />
                   Admin
                 </Button>
@@ -68,13 +100,14 @@ export function Header() {
 
             {isAuthenticated ? (
               <a href="/api/logout" data-testid="link-logout">
-                <Button variant="outline" size="sm" className="hidden md:flex">
+                <Button variant="outline" size="sm" className="hidden md:flex border-destructive/30 hover:border-destructive hover:bg-destructive/10">
                   Logout
                 </Button>
               </a>
             ) : (
               <a href="/login" data-testid="link-login">
-                <Button variant="default" size="sm" className="hidden md:flex">
+                <Button size="sm" className="hidden md:flex gap-2 shadow-lg shadow-primary/25">
+                  <span>🎅</span>
                   Admin Login
                 </Button>
               </a>
@@ -83,7 +116,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="xl:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
@@ -93,15 +126,16 @@ export function Header() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="lg:hidden pb-4 pt-2 space-y-2 border-t">
+          <div className="xl:hidden pb-4 pt-2 space-y-1 border-t border-primary/10 animate-in slide-in-from-top-2 duration-200">
             {navItems.map((item) => {
               const Icon = item.icon;
+              const isActive = location === item.path;
               return (
                 <Link key={item.path} href={item.path} data-testid={`link-mobile-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
                   <Button
-                    variant={location === item.path ? "secondary" : "ghost"}
+                    variant={isActive ? "default" : "ghost"}
                     size="default"
-                    className="w-full justify-start gap-3 font-medium h-12"
+                    className={`w-full justify-start gap-3 font-medium h-12 ${isActive ? 'shadow-md shadow-primary/20' : ''}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
@@ -111,7 +145,7 @@ export function Header() {
               );
             })}
             
-            <div className="border-t pt-2 mt-2 space-y-2">
+            <div className="border-t border-primary/10 pt-3 mt-3 space-y-1">
               {isAuthenticated && (
                 <Link href="/admin" data-testid="link-mobile-admin">
                   <Button
@@ -131,7 +165,7 @@ export function Header() {
                   <Button
                     variant="outline"
                     size="default"
-                    className="w-full justify-start h-12"
+                    className="w-full justify-start h-12 border-destructive/30"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Logout
@@ -140,11 +174,11 @@ export function Header() {
               ) : (
                 <a href="/login" data-testid="link-mobile-login" className="block">
                   <Button
-                    variant="default"
                     size="default"
-                    className="w-full justify-start h-12"
+                    className="w-full justify-start h-12 gap-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
+                    <span>🎅</span>
                     Admin Login
                   </Button>
                 </a>

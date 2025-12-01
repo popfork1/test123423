@@ -21,46 +21,58 @@ import SocialLinks from "@/pages/SocialLinks";
 import Changelogs from "@/pages/Changelogs";
 import Login from "@/pages/Login";
 import NotFound from "@/pages/not-found";
+import { useMemo } from "react";
+
+function ChristmasDecorations() {
+  const snowflakes = useMemo(() => {
+    return Array.from({ length: 30 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      size: Math.random() * 12 + 8,
+      duration: Math.random() * 15 + 10,
+      delay: Math.random() * 10,
+      opacity: Math.random() * 0.4 + 0.3,
+    }));
+  }, []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[1]">
+      {snowflakes.map((flake) => (
+        <div
+          key={flake.id}
+          className="snowflake"
+          style={{
+            left: `${flake.left}%`,
+            fontSize: `${flake.size}px`,
+            animationDuration: `${flake.duration}s`,
+            animationDelay: `${flake.delay}s`,
+            opacity: flake.opacity,
+          }}
+        >
+          ❄
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return null;
-  }
-
-  const christmasElements = Array.from({ length: 80 }).map((_, i) => {
-    const type = i % 4;
-    let content = '❄';
-    if (type === 1) content = '🎄';
-    if (type === 2) content = '🎅';
-    if (type === 3) content = '🎁';
-    
     return (
-      <div
-        key={i}
-        className="absolute select-none font-bold"
-        style={{
-          fontSize: Math.random() * 24 + 12 + 'px',
-          left: Math.random() * 100 + '%',
-          animation: i % 2 === 0 ? `snowfall ${Math.random() * 12 + 8}s linear infinite` : `snowfall-2 ${Math.random() * 12 + 8}s linear infinite`,
-          animationDelay: Math.random() * 5 + 's',
-          top: -40 + 'px',
-          opacity: Math.random() * 0.4 + 0.6,
-        }}
-      >
-        {content}
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4 animate-bounce">🎄</div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
-  });
+  }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Falling festive elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {christmasElements}
-      </div>
-
+    <div className="min-h-screen bg-background relative">
+      <ChristmasDecorations />
       <Header />
       
       <Switch>
