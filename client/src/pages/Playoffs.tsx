@@ -290,7 +290,7 @@ export default function Playoffs() {
               <MatchBox match={wcMatches[0]!} isTeam1={true} team={wcMatches[0]?.team1} />
               <MatchBox match={wcMatches[0]!} isTeam1={false} team={wcMatches[0]?.team2} />
             </div>
-            <div className="h-12" />
+            <div className="h-16" />
             
             {/* Match 2 (8 vs 9) */}
             <div className="flex flex-col gap-0.5" data-testid={`card-match-${wcMatches[1]?.id}`}>
@@ -306,12 +306,26 @@ export default function Playoffs() {
               <MatchBox match={divMatches[0]!} isTeam1={true} team={divMatches[0]?.team1} />
               <MatchBox match={divMatches[0]!} isTeam1={false} team={divMatches[0]?.team2} />
             </div>
-            <div className="h-12" />
+            <div className="h-4" />
             
             {/* Match 2 */}
             <div className="flex flex-col gap-0.5" data-testid={`card-match-${divMatches[1]?.id}`}>
               <MatchBox match={divMatches[1]!} isTeam1={true} team={divMatches[1]?.team1} />
               <MatchBox match={divMatches[1]!} isTeam1={false} team={divMatches[1]?.team2} />
+            </div>
+            <div className="h-4" />
+            
+            {/* Match 3 */}
+            <div className="flex flex-col gap-0.5" data-testid={`card-match-${divMatches[2]?.id}`}>
+              <MatchBox match={divMatches[2]!} isTeam1={true} team={divMatches[2]?.team1} />
+              <MatchBox match={divMatches[2]!} isTeam1={false} team={divMatches[2]?.team2} />
+            </div>
+            <div className="h-4" />
+            
+            {/* Match 4 */}
+            <div className="flex flex-col gap-0.5" data-testid={`card-match-${divMatches[3]?.id}`}>
+              <MatchBox match={divMatches[3]!} isTeam1={true} team={divMatches[3]?.team1} />
+              <MatchBox match={divMatches[3]!} isTeam1={false} team={divMatches[3]?.team2} />
             </div>
           </div>
 
