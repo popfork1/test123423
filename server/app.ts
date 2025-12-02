@@ -22,6 +22,9 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+// Import and start Discord bot
+import { startDiscordBot } from './discordBot';
+
 export const app = express();
 
 declare module 'http' {
@@ -253,6 +256,13 @@ export default async function runApp(
     if (!error.message?.includes('already exists')) {
       console.warn('Database initialization warning:', error.message);
     }
+  }
+
+  // Start Discord bot
+  try {
+    await startDiscordBot();
+  } catch (error: any) {
+    console.warn('Discord bot initialization warning:', error.message);
   }
 
   const server = await registerRoutes(app);
